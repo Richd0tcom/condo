@@ -3,7 +3,6 @@ uvicorn[standard]
 sqlalchemy
 alembic
 psycopg2-binary
-red
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
@@ -15,3 +14,4 @@ pytest
 pytest-asyncio
 structlog
 sqlmodel
+redis

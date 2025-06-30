@@ -23,6 +23,7 @@ class UserAuthScheme(BaseModel):
     
 
     is_deleted = Column(Boolean, default=False)
+    is_locked = Column(Boolean, default=False)
     failed_login_attempts = Column(Integer, default=0)
     last_login = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

@@ -27,7 +27,6 @@ class User(TenantIsolatedModel):
     
 
     is_verified = Column(Boolean, default=False)
-    is_locked = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
 
 
