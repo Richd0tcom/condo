@@ -8,9 +8,7 @@ class Organization(BaseModel):
     """Tenant/Organization model for multi-tenancy"""
     __tablename__ = "organizations"
     
-    # Unique tenant identifier (UUID)
-    id = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()), index=True)
-
+ 
     name = Column(String(255), nullable=False)
     subscription_tier = Column(String(50), default="basic")
     employee_limit = Column(Integer, default=10) 

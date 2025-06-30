@@ -17,7 +17,7 @@ class AuditLog(TenantIsolatedModel):
     resource_type = Column(String(100), nullable=False) 
     resource_id = Column(String(36), nullable=True)  # ID of affected resource
     
-    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     user_email = Column(String(255), nullable=True)  
     
     ip_address = Column(String(45), nullable=True)  # support IPv6 

@@ -30,7 +30,7 @@ class User(TenantIsolatedModel):
     is_deleted = Column(Boolean, default=False)
 
 
-    tenant_id = Column(String(36), ForeignKey("tenants.id"))
+    tenant_id = Column(String(36), ForeignKey("tenants.id", ondelete="CASCADE"))
     
     __table_args__ = (
         UniqueConstraint('email', 'tenant_id', name='uq_user_email_tenant'),

@@ -9,17 +9,14 @@ class OrganizationSettings(BaseModel):
     """Tenant/Organization model for multi-tenancy"""
     __tablename__ = "organization_settings"
     
-    # Unique tenant identifier (UUID)
-    id = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()), index=True)
-    
     
     features_enabled = Column(JSONB, default=list)
     webhook_endpoints = Column(JSONB, default=list)
 
 
-    organization_id = Column(String(36), ForeignKey("organizations.id"))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"))
 
 
     __table_args__ = (
-        UniqueConstraint('organiztion_id', name='uq_org_settings'),
+        UniqueConstraint('organization_id', name='uq_org_settings'),
     )

@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings # type: ignore
+from pydantic_settings import BaseSettings, SettingsConfigDict # type: ignore
 from typing import List, Optional
 import secrets
 
@@ -29,8 +29,6 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

@@ -5,8 +5,7 @@ from app.models.base import BaseModel
 class EmployeeProvisioning(BaseModel):
     __tablename__ = 'employee_provisioning'
 
-    id = Column(String, primary_key=True, index=True)
-    organization_id = Column(String(36), ForeignKey("organizations.id"))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"))
     personal_info = Column(JSONB, nullable=False)
     role_info = Column(JSONB, nullable=False)
     access_requirements = Column(JSONB, nullable=False)

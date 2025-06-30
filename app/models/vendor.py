@@ -15,6 +15,6 @@ class VendorEvent(BaseModel):
     __tablename__ = 'vendor_events'
 
     name = Column(String, index=True, nullable=False)
-    vendor_id = Column(String, ForeignKey('vendors.id'))
+    vendor_id = Column(String, ForeignKey('vendors.id', ondelete="CASCADE"))
     
     vendor = relationship("Vendor", back_populates="events")

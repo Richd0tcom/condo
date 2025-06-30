@@ -14,7 +14,7 @@ class UserAuthScheme(BaseModel):
     __tablename__ = "user_auth_scheme"
     
    
-    user_id = Column(String(36), ForeignKey("users.id"))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"))
 
     hashed_password = Column(String(255), nullable=False)
     
@@ -25,11 +25,7 @@ class UserAuthScheme(BaseModel):
     is_deleted = Column(Boolean, default=False)
     is_locked = Column(Boolean, default=False)
     failed_login_attempts = Column(Integer, default=0)
-    last_login = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-
-    
-    tenant_id = Column(String(36), ForeignKey("tenants.id")) #neccessary?
-    
+    last_login = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)    
 
     
     user = relationship("User", back_populates="users")
