@@ -1,0 +1,17 @@
+fastapi[standard]
+uvicorn[standard]
+sqlalchemy
+alembic
+psycopg2-binary
+red
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+pydantic[email]
+httpx
+celery
+python-decouple
+pytest
+pytest-asyncio
+structlog
+sqlmodel
