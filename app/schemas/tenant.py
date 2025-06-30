@@ -4,7 +4,7 @@ from datetime import datetime
 
 class TenantBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
-    slug: str = Field(..., min_length=3, max_length=100, regex="^[a-z0-9-]+$")
+    slug: str = Field(..., min_length=3, max_length=100, pattern="^[a-z0-9-]+$")
     domain: Optional[str] = Field(None, max_length=255)
 
 class TenantCreate(TenantBase):
@@ -16,7 +16,6 @@ class TenantCreate(TenantBase):
 class TenantUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     domain: Optional[str] = Field(None, max_length=255)
-    settings: Optional[Dict[str, Any]] = None #move to different schema
 
 
 class TenantResponse(TenantBase):

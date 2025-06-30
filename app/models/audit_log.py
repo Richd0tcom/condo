@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, JSON, ForeignKey, I
+from sqlalchemy import Column, String, Text, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -27,6 +27,6 @@ class AuditLog(TenantIsolatedModel):
     old_values = Column(JSONB, nullable=True)
     new_values = Column(JSONB, nullable=True)
     
-    metadata = Column(JSONB, default=dict)
+    data = Column(JSONB, default=dict)
     
     user = relationship("User")

@@ -8,8 +8,7 @@ class Tenant(BaseModel):
     """Tenant/Organization model for multi-tenancy"""
     __tablename__ = "tenants"
     
-    # Unique tenant identifier (UUID)
-    id = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()), index=True)
+    
     
     
     name = Column(String(255), nullable=False)
@@ -23,7 +22,7 @@ class Tenant(BaseModel):
     is_verified = Column(Boolean, default=False)
     
     # Relationships
-    users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
+    users = relationship("User", cascade="all, delete-orphan")
     
     __table_args__ = (
         UniqueConstraint('slug', name='uq_tenant_slug'),

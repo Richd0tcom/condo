@@ -32,10 +32,6 @@ class User(TenantIsolatedModel):
 
     tenant_id = Column(String(36), ForeignKey("tenants.id"))
     
-
-    
-    tenant = relationship("Tenant", back_populates="users")
-    
     __table_args__ = (
         UniqueConstraint('email', 'tenant_id', name='uq_user_email_tenant'),
     )

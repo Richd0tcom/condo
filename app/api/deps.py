@@ -16,7 +16,6 @@ from app.services.tenant import TenantService
 logger = structlog.get_logger()
 security = HTTPBearer()
 
-# Redis client for caching and rate limiting
 redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 def get_redis() -> redis.Redis:
@@ -42,11 +41,9 @@ async def get_current_user(
         if token_data is None:
             raise credentials_exception
         
-        # Parse token payload
         user_id = str(token_data.split(":")[0])  # Format: "user_id:tenant_id"
         tenant_id = token_data.split(":")[1]
         
-        # Get user from database
         user_service = UserService(db)
         user = user_service.get_user_by_id(user_id, tenant_id)
         
@@ -65,7 +62,6 @@ async def get_current_user(
                 detail="User account is locked"
             )
         
-        # Set request context
         request.state.user_id = user.id
         request.state.tenant_id = user.tenant_id
         request.state.user_role = user.role

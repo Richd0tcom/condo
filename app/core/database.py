@@ -2,9 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import logging
-import settings
+from .settings import settings
 
 logger = logging.getLogger(__name__)
+print("---------LOADED SETTINGS------",settings.DATABASE_URL )
 
 engine = create_engine(
     settings.DATABASE_URL,

@@ -70,9 +70,45 @@ class TenantContextMiddleware(BaseHTTPMiddleware):
         if tenant_header:
             tenant_id = tenant_header
         
-        # Method 3: From JWT token (will be set by auth dependency)
-        # This will be handled in the auth dependency
+        # OR From JWT token (will be set by auth dependency)
         
         request.state.tenant_id = tenant_id
+        response = await call_next(request)
+        return response
+
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Enterprise-grade rate limiting middleware"""
+    
+    def __init__(self, app, redis_client: redis.Redis):
+        super().__init__(app)
+        self.redis_client = redis_client
+        self.rate_limit = settings.RATE_LIMIT_PER_MINUTE
+    
+    async def dispatch(self, request: Request, call_next: Callable):
+        client_ip = request.client.host
+        user_id = getattr(request.state, 'user_id', None)
+        client_key = f"rate_limit:{client_ip}:{user_id or 'anonymous'}"
+        
+        try:
+            current_requests = self.redis_client.get(client_key)
+            if current_requests is None:
+                self.redis_client.setex(client_key, 60, 1)  # 1 minute window
+            else:
+                current_count = int(current_requests)
+                if current_count >= self.rate_limit:
+                    logger.warning("Rate limit exceeded", 
+                                 client_ip=client_ip, 
+                                 user_id=user_id,
+                                 count=current_count)
+                    return JSONResponse(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        content={"detail": "Rate limit exceeded. Try again later."}
+                    )
+                self.redis_client.incr(client_key)
+        except redis.RedisError as e:
+            logger.error("Redis error in rate limiting", error=str(e))
+        
         response = await call_next(request)
         return response
