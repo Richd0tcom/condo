@@ -32,7 +32,6 @@ class EventType(str, Enum):
 class WebhookEvent(BaseModel):
     __tablename__ = "webhook_events"
 
-    id = Column(String, primary_key=True, index=True)
     service_name = Column(String, nullable=False, index=True)
     event_type = Column(String, nullable=False, index=True)
     payload = Column(JSONB, nullable=False,  default=dict)

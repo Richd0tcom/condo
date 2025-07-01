@@ -13,7 +13,7 @@ class IntegrationHealth(BaseModel):
     status = Column(String(50), nullable=False)
     response_time_ms = Column(Float, nullable=False)
     error_message = Column(Text, nullable=True)
-    metadata = Column(JSONB, default=dict)
+    data = Column(JSONB, default=dict)
     checked_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
