@@ -1,7 +1,6 @@
 from celery import Task
 from app.tasks.celery import celery_app
 from app.services.sync_engine import DataSyncEngine
-from app.services.integration_service import IntegrationService
 from app.core.database import get_db
 import logging
 import asyncio
@@ -11,8 +10,10 @@ logger = logging.getLogger(__name__)
 class SyncCallbackTask(Task):
     def on_success(self, retval, task_id, args, kwargs):
         logger.info(f"Sync task {task_id} completed successfully")
+
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         logger.error(f"Sync task {task_id} failed: {exc}")
+        
     def on_retry(self, exc, task_id, args, kwargs, einfo):
         logger.warning(f"Sync task {task_id} retrying: {exc}")
 
@@ -24,8 +25,8 @@ def trigger_sync_task(self, organization_id, service_name, entity_type=None, for
         asyncio.set_event_loop(loop)
         async def run():
             async with get_db() as db:
-                integration_service = IntegrationService()
-                sync_engine = DataSyncEngine(integration_service)
+
+                sync_engine = DataSyncEngine()
                 result = await sync_engine.trigger_sync(
                     db=db,
                     organization_id=organization_id,
@@ -52,8 +53,7 @@ def batch_sync_task(self, organization_id):
         asyncio.set_event_loop(loop)
         async def run():
             async with get_db() as db:
-                integration_service = IntegrationService()
-                sync_engine = DataSyncEngine(integration_service)
+                sync_engine = DataSyncEngine()
                 results = await sync_engine.batch_sync(
                     db=db,
                     organization_id=organization_id

@@ -6,16 +6,13 @@ import json
 import logging
 from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-from sqlalchemy import select, update, and_, or_
+from sqlalchemy import select, and_
 import hashlib
 
 from app.core.database import get_db
 from app.models.sync import SyncConfiguration, SyncStatus, DataSyncLog, ConflictResolution
 from app.models.organization import Organization
-from app.services.integration_service import IntegrationService
-from app.services.external_api_client import ExternalAPIClient
-from app.core.redis import redis_client
+from app.integrations.external_client import ExternalApiClient
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +59,8 @@ class DataSyncEngine:
     Handles bidirectional sync, conflict resolution, and batch operations
     """
     
-    def __init__(self, integration_service: IntegrationService):
-        self.integration_service = integration_service
-        self.external_client = ExternalAPIClient()
+    def __init__(self):
+        self.external_client = ExternalApiClient()
         self.sync_locks = {}  
 
 

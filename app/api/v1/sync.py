@@ -1,52 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel
+
 
 from app.core.database import get_db
 from app.api.deps import get_current_user
+from app.models.sync import SyncConfiguration
 from app.models.user import User
+from app.schemas.sync import SyncConfigurationCreate, SyncConfigurationResponse, SyncResultResponse, SyncTriggerRequest
 from app.services.sync_engine import DataSyncEngine, SyncDirection, SyncFrequency, ConflictStrategy
-from app.services.integration_service import IntegrationService
+from app.tasks.sync import trigger_sync_task, batch_sync_task
+
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 
-class SyncConfigurationCreate(BaseModel):
-    service_name: str
-    entity_type: str
-    direction: SyncDirection
-    frequency: SyncFrequency
-    conflict_strategy: ConflictStrategy
-    field_mappings: Dict[str, str]
-    filters: Optional[Dict[str, Any]] = None
 
-class SyncConfigurationResponse(BaseModel):
-    id: str
-    service_name: str
-    entity_type: str
-    direction: str
-    frequency: str
-    conflict_strategy: str
-    field_mappings: Dict[str, str]
-    filters: Optional[Dict[str, Any]]
-    is_active: bool
-    last_sync_at: Optional[str]
-    created_at: str
-
-class SyncTriggerRequest(BaseModel):
-    service_name: str
-    entity_type: Optional[str] = None
-    force: bool = False
-
-class SyncResultResponse(BaseModel):
-    success: bool
-    records_processed: int
-    records_synced: int
-    records_failed: int
-    conflicts_detected: int
-    conflicts_resolved: int
-    errors: List[str]
-    execution_time: float
 
 @router.post("/configurations", response_model=SyncConfigurationResponse)
 async def create_sync_configuration(
@@ -59,8 +28,7 @@ async def create_sync_configuration(
     if not current_user.organization_id:
         raise HTTPException(status_code=400, detail="User must belong to an organization")
     
-    integration_service = IntegrationService()
-    sync_engine = DataSyncEngine(integration_service)
+    sync_engine = DataSyncEngine()
     
     try:
         config = await sync_engine.create_sync_configuration(
@@ -93,17 +61,10 @@ async def list_sync_configurations(
     """List all sync configurations for the current user's organization"""
     if not current_user.organization_id:
         raise HTTPException(status_code=400, detail="User must belong to an organization")
-    integration_service = IntegrationService()
-    sync_engine = DataSyncEngine(integration_service)
-    query = await db.execute(
-        f"""
-        SELECT * FROM sync_configurations WHERE organization_id = '{current_user.organization_id}'
-        """
-    )
-    configs = query.fetchall()
-    # If using ORM, fetch via SQLAlchemy model
-    # configs = await db.execute(select(SyncConfiguration).where(SyncConfiguration.organization_id == current_user.organization_id))
-    # configs = configs.scalars().all()
+    
+
+    configs = await db.execute(select(SyncConfiguration).where(SyncConfiguration.organization_id == current_user.organization_id))
+    configs = configs.scalars().all()
     result = []
     for config in configs:
         result.append(SyncConfigurationResponse(
@@ -131,11 +92,9 @@ async def trigger_sync(
     """Trigger a sync for a service/entity. Runs in background if long-running."""
     if not current_user.organization_id:
         raise HTTPException(status_code=400, detail="User must belong to an organization")
-    integration_service = IntegrationService()
-    sync_engine = DataSyncEngine(integration_service)
+    
     try:
-        # For demo, run in background if force is True
-        from app.tasks.sync import trigger_sync_task
+        
         background_tasks.add_task(
             trigger_sync_task.delay,
             str(current_user.organization_id),
@@ -165,8 +124,8 @@ async def get_sync_status(
     """Get sync status for the organization (optionally filter by service)."""
     if not current_user.organization_id:
         raise HTTPException(status_code=400, detail="User must belong to an organization")
-    integration_service = IntegrationService()
-    sync_engine = DataSyncEngine(integration_service)
+    
+    sync_engine = DataSyncEngine()
     return await sync_engine.get_sync_status(
         db=db,
         organization_id=str(current_user.organization_id),
@@ -183,7 +142,7 @@ async def batch_sync(
     if not current_user.organization_id:
         raise HTTPException(status_code=400, detail="User must belong to an organization")
     try:
-        from app.tasks.sync import batch_sync_task
+       
         background_tasks.add_task(
             batch_sync_task.delay,
             str(current_user.organization_id)
