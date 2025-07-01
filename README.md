@@ -1,4 +1,4 @@
-# Condo - Enterprise Multi-Tenant SaaS Platform
+# Condo - Enterprise Multi-Tenant SaaS Platform (In progress)
 
 A comprehensive backend system that combines multi-tenant SaaS platform features with external API integration capabilities. This platform demonstrates advanced platform engineering and integration architecture skills.
 
@@ -9,7 +9,7 @@ Orion is built as a modern, scalable SaaS platform with the following key archit
 - **Multi-Tenant Data Isolation**: Database-level security with tenant context middleware
 - **JWT Authentication**: Role-based access control with secure token management
 - **RESTful API**: FastAPI-based endpoints with comprehensive validation
-- **External Integration Engine**: Webhook processing with async event handling
+- **External Integration**: Webhook processing with async event handling
 - **Audit & Compliance**: Comprehensive logging for all data modifications
 - **Circuit Breaker Pattern**: Resilient external API communication
 - **Rate Limiting**: Enterprise-grade request throttling
@@ -23,7 +23,7 @@ Orion is built as a modern, scalable SaaS platform with the following key archit
 - Python 3.9+
 - PostgreSQL 15+
 - Redis 6+
-- Docker (optional)
+- Docker (optional, not necessary needed unless for testing)
 
 ### Installation
 

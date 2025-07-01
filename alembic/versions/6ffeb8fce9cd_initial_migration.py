@@ -62,6 +62,18 @@ def upgrade() -> None:
     sa.UniqueConstraint('domain', name='uq_tenant_domain'),
     sa.UniqueConstraint('slug', name='uq_tenant_slug')
     )
+
+    op.execute(
+        "ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;",
+    )
+    op.execute(
+        "CREATE POLICY tenant_isolation on tenants \
+            USING (id = current_setting('app.current_tenant'));",
+    )
+
+
+
+
     op.create_index(op.f('ix_tenants_id'), 'tenants', ['id'], unique=False)
     op.create_index(op.f('ix_tenants_slug'), 'tenants', ['slug'], unique=True)
     op.create_table('vendors',
