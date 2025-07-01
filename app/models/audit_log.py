@@ -17,6 +17,8 @@ class AuditLog(TenantIsolatedModel):
     resource_id = Column(UUID(as_uuid=True), nullable=True)  # ID of affected resource
     
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"))
+
     user_email = Column(String(255), nullable=True)  
     
     ip_address = Column(String(45), nullable=True)  # support IPv6 

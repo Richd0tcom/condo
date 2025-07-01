@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Any, Union, Optional
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from passlib.hash import bcrypt
+import bcrypt
 import secrets
 
 from app.core.settings import settings
@@ -22,11 +22,13 @@ def create_access_token(subject: Union[str, Any], expires_delta: timedelta = Non
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password)
 
 def get_password_hash(password: str) -> str:
     """Generate password hash"""
-    return pwd_context.hash(password)
+
+    pwd_bytes = password.encode('utf-8')
+    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt())
 
 def verify_token(token: str) -> Optional[str]:
     """Verify JWT token and return subject"""

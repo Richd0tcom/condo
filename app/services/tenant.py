@@ -4,6 +4,7 @@ from typing import Optional, List
 import structlog
 import uuid
 
+from app.models.auth_schema import UserAuthScheme
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
 from app.models.audit_log import AuditLog
@@ -49,9 +50,8 @@ class TenantService:
                 raise ValueError("Tenant with this domain already exists")
         
         try:
-            tenant_id = str(uuid.uuid4())
+
             db_tenant = Tenant(
-                tenant_id=tenant_id,
                 name=tenant_data.name,
                 slug=tenant_data.slug,
                 domain=tenant_data.domain
@@ -60,26 +60,38 @@ class TenantService:
             self.db.add(db_tenant)
             self.db.flush()  # Get ID without committing
             
+            
 
             admin_user = User(
                 email=tenant_data.admin_email,
-                hashed_password=get_password_hash(tenant_data.admin_password),
+                
                 first_name=tenant_data.admin_first_name,
                 last_name=tenant_data.admin_last_name,
                 role=UserRole.TENANT_ADMIN,
-                tenant_id=tenant_id,
+                tenant_id=db_tenant.id,
                 is_verified=True  # Auto-verify admin user
             )
-            
+
             self.db.add(admin_user)
             self.db.flush()
+
+            
+            auth_scheme = UserAuthScheme(
+                user_id=admin_user.id,
+                hashed_password=get_password_hash(tenant_data.admin_password),
+            )
+            
+            self.db.add(auth_scheme)
+            self.db.flush()            
+            
+            
+
             
             audit_log = AuditLog(
                 event_type="CREATE",
                 resource_type="Tenant",
                 resource_id=str(db_tenant.id),
                 user_id=admin_user.id,
-                tenant_id=tenant_id,
                 new_values={
                     "name": tenant_data.name,
                     "slug": tenant_data.slug,
@@ -89,11 +101,13 @@ class TenantService:
             )
             
             self.db.add(audit_log)
+
+            print("I reached here")
             self.db.commit()
             self.db.refresh(db_tenant)
             
             logger.info("Tenant created with admin", 
-                       tenant_id=tenant_id,
+                       tenant_id=db_tenant.id,
                        slug=tenant_data.slug,
                        admin_email=tenant_data.admin_email)
             

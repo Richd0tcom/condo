@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.Column('resolved_by', sa.UUID(), nullable=True),
     sa.Column('resolved_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -63,7 +63,7 @@ def upgrade() -> None:
     sa.Column('execution_time', sa.Float(), nullable=True),
     sa.Column('errors', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -80,7 +80,7 @@ def upgrade() -> None:
     sa.Column('retry_policy', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('event_types', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('rate_limit', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('slug', 'id')
@@ -95,7 +95,7 @@ def upgrade() -> None:
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('checked_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -105,7 +105,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('subscription_tier', sa.String(length=50), nullable=True),
     sa.Column('employee_limit', sa.Integer(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -131,7 +131,7 @@ def upgrade() -> None:
     sa.Column('processed_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -150,7 +150,7 @@ def upgrade() -> None:
     sa.Column('last_sync_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
 
@@ -179,7 +179,7 @@ def upgrade() -> None:
     sa.Column('started_at', sa.DateTime(), nullable=False),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.Column('error_message', sa.Text(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -206,7 +206,7 @@ def upgrade() -> None:
     sa.Column('plan_type', sa.String(length=50), nullable=True),
     sa.Column('employee_count', sa.Integer(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -228,7 +228,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_tenants_slug'), 'tenants', ['slug'], unique=True)
     op.create_table('vendors',
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -247,7 +247,7 @@ def upgrade() -> None:
     sa.Column('last_attempted_at', sa.DateTime(), nullable=True),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.Column('archived_at', sa.DateTime(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -264,7 +264,7 @@ def upgrade() -> None:
     sa.Column('steps', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('estimated_duration_in_minutes', sa.Integer(), nullable=True),
     sa.Column('requires_approval', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -276,7 +276,7 @@ def upgrade() -> None:
     sa.Column('role_info', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('access_requirements', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('equipment_needs', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
@@ -300,7 +300,7 @@ def upgrade() -> None:
     sa.Column('enabled', sa.Boolean(), nullable=True),
     sa.Column('last_sync', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
@@ -323,7 +323,7 @@ def upgrade() -> None:
     sa.Column('features_enabled', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('webhook_endpoints', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
@@ -347,7 +347,7 @@ def upgrade() -> None:
     op.create_table('organization_tenants',
     sa.Column('tenant_id', sa.UUID(), nullable=True),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
@@ -364,7 +364,7 @@ def upgrade() -> None:
     sa.Column('domain', sa.String(length=255), nullable=False),
     sa.Column('attribute_mappings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('role_mappings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
@@ -394,7 +394,7 @@ def upgrade() -> None:
     sa.Column('is_verified', sa.Boolean(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=True),
     sa.Column('tenant_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
@@ -419,7 +419,7 @@ def upgrade() -> None:
     op.create_table('vendor_events',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('vendor_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['vendor_id'], ['vendors.id'], ondelete='CASCADE'),
@@ -440,7 +440,7 @@ def upgrade() -> None:
     sa.Column('new_values', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('tenant_id', sa.UUID(), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
@@ -470,7 +470,7 @@ def upgrade() -> None:
     sa.Column('is_locked', sa.Boolean(), nullable=True),
     sa.Column('failed_login_attempts', sa.Integer(), nullable=True),
     sa.Column('last_login', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),

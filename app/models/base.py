@@ -1,4 +1,4 @@
-from sqlalchemy import UUID, Column, Integer, DateTime, String, Boolean, Text
+from sqlalchemy import UUID, Column, Integer, DateTime, String, Boolean, Text, text
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 import uuid
@@ -13,7 +13,7 @@ class BaseModel(Base):
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    id = Column(UUID(as_uuid=True), primary_key=True, index=True, server_default=func.)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, server_default=text("gen_random_uuid()"))
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

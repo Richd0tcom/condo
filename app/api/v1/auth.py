@@ -9,6 +9,7 @@ from app.core.security import create_access_token
 from app.core.settings import settings
 from app.models.user import User
 from app.schemas.auth import Token, LoginRequest, RegisterRequest, UserProfile
+from app.schemas.tenant import TenantCreate
 from app.services.user import UserService
 from app.services.tenant import TenantService
 from app.api.deps import get_current_active_user
@@ -19,7 +20,7 @@ router = APIRouter()
 @router.post("/register", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def register_tenant_and_admin(
     request: Request,
-    registration_data: RegisterRequest,
+    registration_data: TenantCreate,
     db: Session = Depends(get_db)
 ):
     """Register new tenant with admin user"""
@@ -48,6 +49,7 @@ async def register_tenant_and_admin(
             detail=str(e)
         )
     except Exception as e:
+        print(e)
         logger.error("Registration failed", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
