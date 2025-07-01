@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: f06e153430f6
+Revision ID: 80b8196606cc
 Revises: 
-Create Date: 2025-07-01 14:06:40.913531
+Create Date: 2025-07-01 19:45:18.135782
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f06e153430f6'
+revision: str = '80b8196606cc'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,11 +34,10 @@ def upgrade() -> None:
     sa.Column('resolved_by', sa.UUID(), nullable=True),
     sa.Column('resolved_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-
 
     # isolation policy
     op.execute(
@@ -64,7 +63,7 @@ def upgrade() -> None:
     sa.Column('execution_time', sa.Float(), nullable=True),
     sa.Column('errors', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -81,7 +80,7 @@ def upgrade() -> None:
     sa.Column('retry_policy', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('event_types', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('rate_limit', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('slug', 'id')
@@ -96,7 +95,7 @@ def upgrade() -> None:
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('checked_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -106,12 +105,11 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('subscription_tier', sa.String(length=50), nullable=True),
     sa.Column('employee_limit', sa.Integer(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-
 
     op.execute(
         "ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;",
@@ -120,6 +118,9 @@ def upgrade() -> None:
         "CREATE POLICY org_isolation on organizations \
             USING (id = current_setting('app.current_org')::uuid);",
     )
+
+
+
     op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
     op.create_table('processed_events',
     sa.Column('event_hash', sa.String(length=64), nullable=False),
@@ -130,7 +131,7 @@ def upgrade() -> None:
     sa.Column('processed_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -149,10 +150,9 @@ def upgrade() -> None:
     sa.Column('last_sync_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-
 
     #isolation policy
     op.execute(
@@ -179,11 +179,12 @@ def upgrade() -> None:
     sa.Column('started_at', sa.DateTime(), nullable=False),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.Column('error_message', sa.Text(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+
 
     #isolation policy
     op.execute(
@@ -193,7 +194,6 @@ def upgrade() -> None:
         "CREATE POLICY org_isolation on sync_status \
             USING (organization_id = current_setting('app.current_org')::uuid);",
     )
-
 
 
     op.create_index(op.f('ix_sync_status_id'), 'sync_status', ['id'], unique=False)
@@ -206,7 +206,7 @@ def upgrade() -> None:
     sa.Column('plan_type', sa.String(length=50), nullable=True),
     sa.Column('employee_count', sa.Integer(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -223,11 +223,12 @@ def upgrade() -> None:
     )
 
 
+
     op.create_index(op.f('ix_tenants_id'), 'tenants', ['id'], unique=False)
     op.create_index(op.f('ix_tenants_slug'), 'tenants', ['slug'], unique=True)
     op.create_table('vendors',
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -246,7 +247,7 @@ def upgrade() -> None:
     sa.Column('last_attempted_at', sa.DateTime(), nullable=True),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.Column('archived_at', sa.DateTime(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -263,7 +264,7 @@ def upgrade() -> None:
     sa.Column('steps', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('estimated_duration_in_minutes', sa.Integer(), nullable=True),
     sa.Column('requires_approval', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -275,16 +276,12 @@ def upgrade() -> None:
     sa.Column('role_info', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('access_requirements', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('equipment_needs', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-
-
-
-
 
     #isolation policy
     op.execute(
@@ -296,19 +293,19 @@ def upgrade() -> None:
     )
 
 
+
     op.create_index(op.f('ix_employee_provisioning_id'), 'employee_provisioning', ['id'], unique=False)
     op.create_table('organization_integrations',
     sa.Column('integration_type', sa.String(length=255), nullable=False),
     sa.Column('enabled', sa.Boolean(), nullable=True),
     sa.Column('last_sync', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-
 
     #isolation policy
     op.execute(
@@ -326,15 +323,13 @@ def upgrade() -> None:
     sa.Column('features_enabled', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('webhook_endpoints', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('organization_id', name='uq_org_settings')
     )
-
-
 
     #isolation policy
     op.execute(
@@ -346,11 +341,13 @@ def upgrade() -> None:
     )
 
 
+
+
     op.create_index(op.f('ix_organization_settings_id'), 'organization_settings', ['id'], unique=False)
     op.create_table('organization_tenants',
     sa.Column('tenant_id', sa.UUID(), nullable=True),
     sa.Column('organization_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
@@ -367,7 +364,7 @@ def upgrade() -> None:
     sa.Column('domain', sa.String(length=255), nullable=False),
     sa.Column('attribute_mappings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('role_mappings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
@@ -375,7 +372,8 @@ def upgrade() -> None:
     )
 
 
-    # isolation policy
+
+        # isolation policy
     op.execute(
         "ALTER TABLE tenant_sso_config ENABLE ROW LEVEL SECURITY;",
     )
@@ -383,6 +381,7 @@ def upgrade() -> None:
         "CREATE POLICY tenant_isolation on tenant_sso_config \
             USING (tenant_id = current_setting('app.current_tenant')::uuid);",
     )
+
 
 
 
@@ -395,14 +394,13 @@ def upgrade() -> None:
     sa.Column('is_verified', sa.Boolean(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=True),
     sa.Column('tenant_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email', 'tenant_id', name='uq_user_email_tenant')
     )
-
 
 
     # isolation policy
@@ -415,12 +413,13 @@ def upgrade() -> None:
     )
 
 
+
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=False)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('vendor_events',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('vendor_id', sa.UUID(), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['vendor_id'], ['vendors.id'], ondelete='CASCADE'),
@@ -441,7 +440,7 @@ def upgrade() -> None:
     sa.Column('new_values', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('tenant_id', sa.UUID(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
@@ -461,7 +460,6 @@ def upgrade() -> None:
 
 
 
-
     op.create_index(op.f('ix_audit_logs_id'), 'audit_logs', ['id'], unique=False)
     op.create_index(op.f('ix_audit_logs_tenant_id'), 'audit_logs', ['tenant_id'], unique=False)
     op.create_table('user_auth_scheme',
@@ -472,7 +470,7 @@ def upgrade() -> None:
     sa.Column('is_locked', sa.Boolean(), nullable=True),
     sa.Column('failed_login_attempts', sa.Integer(), nullable=True),
     sa.Column('last_login', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default='gen_random_uuid()', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
