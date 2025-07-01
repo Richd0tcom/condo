@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, JSON, ForeignKey
+from sqlalchemy import UUID, Column, String, Text, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -10,14 +10,13 @@ class AuditLog(TenantIsolatedModel):
 
 
     # CREATE, UPDATE, DELETE, LOGIN
-    # TODO: change this to enum
+
     event_type = Column(String(100), nullable=False)  
 
-    # User, Tenant, etc. TODO: change this to enum
     resource_type = Column(String(100), nullable=False) 
-    resource_id = Column(String(36), nullable=True)  # ID of affected resource
+    resource_id = Column(UUID(as_uuid=True), nullable=True)  # ID of affected resource
     
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     user_email = Column(String(255), nullable=True)  
     
     ip_address = Column(String(45), nullable=True)  # support IPv6 

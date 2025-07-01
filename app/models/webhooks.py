@@ -1,5 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Text, Integer, JSON, Enum as SQLEnum
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
+
 from datetime import datetime
 from enum import Enum
 
@@ -33,10 +35,10 @@ class WebhookEvent(BaseModel):
     id = Column(String, primary_key=True, index=True)
     service_name = Column(String, nullable=False, index=True)
     event_type = Column(String, nullable=False, index=True)
-    payload = Column(JSON, nullable=False)
+    payload = Column(JSONB, nullable=False,  default=dict)
     tenant_id = Column(String, nullable=True, index=True)
     idempotency_key = Column(String, nullable=False, unique=True, index=True)
-    status = Column(SQLEnum(WebhookStatus), default=WebhookStatus.PENDING, index=True)
+    status = Column(String, default=WebhookStatus.PENDING, index=True)
     retry_count = Column(Integer, default=0)
     error_message = Column(Text, nullable=True)
     

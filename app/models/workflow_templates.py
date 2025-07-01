@@ -7,6 +7,6 @@ class WorkflowTemplate(BaseModel):
 
     name = Column(String, nullable=False)
     description = Column(String)
-    steps = Column(JSONB, nullable=False)
+    steps = Column(JSONB, nullable=False,  default=dict)
     estimated_duration_in_minutes = Column(Integer)
     requires_approval = Column(Boolean, default=False)

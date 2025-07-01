@@ -21,7 +21,7 @@ class Tenant(BaseModel):
     
     is_verified = Column(Boolean, default=False)
     
-    # Relationships
+  
     users = relationship("User", cascade="all, delete-orphan")
     
     __table_args__ = (

@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import DateTime, ForeignKey, Integer, Column, String, Text, JSON, Boolean, UniqueConstraint, func
+from sqlalchemy import UUID, DateTime, ForeignKey, Integer, Column, String, Boolean, func
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -19,7 +19,6 @@ class OrganizationIntegrations(BaseModel):
     
     last_sync = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-
-    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"))
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"))
 
 

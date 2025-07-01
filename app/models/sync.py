@@ -1,5 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Boolean, Integer, JSON, Text, Float
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB
+
 from app.core.database import Base
 import uuid
 
@@ -14,8 +16,8 @@ class SyncConfiguration(BaseModel):
     direction = Column(String(20), nullable=False)  # inbound, outbound, bidirectional
     frequency = Column(String(20), nullable=False)  # real_time, every_5_min, hourly, daily
     conflict_strategy = Column(String(50), nullable=False)
-    field_mappings = Column(JSON, nullable=False)
-    filters = Column(JSON, nullable=True)
+    field_mappings = Column(JSONB, nullable=False)
+    filters = Column(JSONB, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     last_sync_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False)
@@ -47,7 +49,7 @@ class DataSyncLog(BaseModel):
     conflicts_detected = Column(Integer, default=0)
     conflicts_resolved = Column(Integer, default=0)
     execution_time = Column(Float, default=0.0)
-    errors = Column(JSON, nullable=True)
+    errors = Column(JSONB, nullable=True)
     created_at = Column(DateTime, nullable=False)
 
 class ConflictResolution(BaseModel):
@@ -58,8 +60,8 @@ class ConflictResolution(BaseModel):
     entity_type = Column(String(100), nullable=False)
     internal_id = Column(String(255), nullable=True)
     external_id = Column(String(255), nullable=False)
-    internal_data = Column(JSON, nullable=False)
-    external_data = Column(JSON, nullable=False)
+    internal_data = Column(JSONB, nullable=False,  default=dict)
+    external_data = Column(JSONB, nullable=False,  default=dict)
     status = Column(String(20), default="pending")  # pending, resolved, ignored
     resolution_strategy = Column(String(50), nullable=True)
     resolved_by = Column(UUID(as_uuid=True), nullable=True)

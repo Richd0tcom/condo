@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import UUID, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 
@@ -15,6 +15,6 @@ class VendorEvent(BaseModel):
     __tablename__ = 'vendor_events'
 
     name = Column(String, index=True, nullable=False)
-    vendor_id = Column(String, ForeignKey('vendors.id', ondelete="CASCADE"))
+    vendor_id = Column(UUID(as_uuid=True), ForeignKey('vendors.id', ondelete="CASCADE"))
     
     vendor = relationship("Vendor", back_populates="events")

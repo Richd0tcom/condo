@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, Column, String, Text, JSON, Boolean, UniqueConstraint
+from sqlalchemy import UUID, ForeignKey, Integer, Column, String, Text, JSON, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 import uuid
 from sqlalchemy.dialects.postgresql import JSONB
@@ -13,8 +13,7 @@ class OrganizationSettings(BaseModel):
     features_enabled = Column(JSONB, default=list)
     webhook_endpoints = Column(JSONB, default=list)
 
-
-    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"))
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"))
 
 
     __table_args__ = (

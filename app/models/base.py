@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, String, Boolean, Text
+from sqlalchemy import UUID, Column, Integer, DateTime, String, Boolean, Text
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 import uuid
@@ -13,7 +13,7 @@ class BaseModel(Base):
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    id = Column(String(36), primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -22,7 +22,7 @@ class TenantIsolatedModel(BaseModel):
     """Base model for tenant-isolated entities"""
     __abstract__ = True
     
-    tenant_id = Column(String(36), nullable=False, index=True)  # UUID as string for tenant isolation
+    tenant_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID as string for tenant isolation
     
     def __init__(self, **kwargs):
         # Ensure tenant_id is always set

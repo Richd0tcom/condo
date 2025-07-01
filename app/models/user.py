@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum as SQLEnum, UniqueConstraint
+from sqlalchemy import UUID, Column, Integer, String, Boolean, ForeignKey, Enum as SQLEnum, UniqueConstraint
 from sqlalchemy.orm import relationship
 import enum
 
@@ -30,7 +30,7 @@ class User(TenantIsolatedModel):
     is_deleted = Column(Boolean, default=False)
 
 
-    tenant_id = Column(String(36), ForeignKey("tenants.id", ondelete="CASCADE"))
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"))
     
     __table_args__ = (
         UniqueConstraint('email', 'tenant_id', name='uq_user_email_tenant'),

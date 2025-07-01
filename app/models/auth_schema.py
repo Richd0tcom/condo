@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey, Enum as SQLEnum, UniqueConstraint, func
+from sqlalchemy import UUID, Column, DateTime, Integer, String, Boolean, ForeignKey, Enum as SQLEnum, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 import enum
 
@@ -14,7 +14,7 @@ class UserAuthScheme(BaseModel):
     __tablename__ = "user_auth_scheme"
     
    
-    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
 
     hashed_password = Column(String(255), nullable=False)
     
@@ -28,7 +28,7 @@ class UserAuthScheme(BaseModel):
     last_login = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)    
 
     
-    user = relationship("User", back_populates="users")
+    user = relationship("User", back_populates="auth_scheme")
 
     # we should probably have a unique constraint on user_id+authscheme 
     
