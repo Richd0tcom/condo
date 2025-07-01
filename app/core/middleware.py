@@ -63,7 +63,6 @@ class TenantContextMiddleware(BaseHTTPMiddleware):
         if "." in host:
             subdomain = host.split(".")[0]
             if subdomain not in ["www", "api"]:
-                # Look up tenant by subdomain (implement in service layer)
                 pass
         
         tenant_header = request.headers.get("X-Tenant-ID")

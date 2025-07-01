@@ -158,7 +158,7 @@ class TenantService:
         
         self.db.query(User).filter(User.tenant_id == tenant_id).update({"is_active": False})
         
-        # Audit log
+
         audit_log = AuditLog(
             event_type="DEACTIVATE",
             resource_type="Tenant",
