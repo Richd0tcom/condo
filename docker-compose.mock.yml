@@ -1,0 +1,72 @@
+services:
+  mock-user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-services
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVICE_NAME=user_management
+      - SERVICE_PORT=8001
+    networks:
+      - mock-services-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-services
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVICE_NAME=payment
+      - SERVICE_PORT=8002
+    networks:
+      - mock-services-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-communication-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-services
+    ports:
+      - "8003:8003"
+    environment:
+      - SERVICE_NAME=communication
+      - SERVICE_PORT=8003
+    networks:
+      - mock-services-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-service-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-services
+    ports:
+      - "8010:8010"
+    environment:
+      - SERVICE_NAME=orchestrator
+      - SERVICE_PORT=8010
+    depends_on:
+      - mock-user-service
+      - mock-payment-service
+      - mock-communication-service
+    networks:
+      - mock-services-network
+    command: ["python", "-m", "app.cli.mock_services", "start"]
+
+networks:
+  mock-services-network:
+    driver: bridge
