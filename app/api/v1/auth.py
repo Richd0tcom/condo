@@ -31,16 +31,16 @@ async def register_tenant_and_admin(
         tenant = tenant_service.create_tenant_with_admin(registration_data)
         
         logger.info("Tenant registration", 
-                   tenant_id=tenant.tenant_id,
-                   slug=registration_data.tenant_slug,
-                   admin_email=registration_data.email,
+                   tenant_id=tenant.id,
+                   slug=registration_data.slug,
+                   admin_email=registration_data.admin_email,
                    ip_address=request.client.host)
         
         return {
             "message": "Tenant and admin user created successfully",
-            "tenant_id": tenant.tenant_id,
+            "tenant_id": tenant.id,
             "slug": tenant.slug,
-            "admin_email": registration_data.email
+            "admin_email": registration_data.admin_email
         }
         
     except ValueError as e:
@@ -85,22 +85,17 @@ async def login(
                 detail="Tenant not found or not specified"
             )
         
-        if not tenant.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Tenant account is deactivated"
-            )
         
         user = user_service.authenticate_user(
             email=login_data.email,
             password=login_data.password,
-            tenant_id=tenant.tenant_id
+            tenant_id=tenant.id
         )
         
         if not user:
             logger.warning("Failed login attempt", 
                           email=login_data.email,
-                          tenant_id=tenant.tenant_id,
+                          tenant_id=tenant.id,
                           ip_address=request.client.host)
             
             raise HTTPException(
@@ -123,13 +118,11 @@ async def login(
         
         return {
             "access_token": access_token,
-            "token_type": "bearer",
-            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             "user_info": {
                 "id": user.id,
                 "email": user.email,
                 "full_name": user.full_name,
-                "role": user.role.value,
+                "role": user.role,
                 "tenant_id": user.tenant_id,
                 "tenant_name": tenant.name
             }

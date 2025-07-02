@@ -10,8 +10,6 @@ class TokenData(BaseModel):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str = "bearer"
-    expires_in: int
     user_info: dict
 
 class LoginRequest(BaseModel):

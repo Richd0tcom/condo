@@ -92,6 +92,7 @@ class TenantService:
                 resource_type="Tenant",
                 resource_id=str(db_tenant.id),
                 user_id=admin_user.id,
+                tenant_id=db_tenant.id,
                 new_values={
                     "name": tenant_data.name,
                     "slug": tenant_data.slug,
@@ -102,7 +103,7 @@ class TenantService:
             
             self.db.add(audit_log)
 
-            print("I reached here")
+            
             self.db.commit()
             self.db.refresh(db_tenant)
             
@@ -115,6 +116,8 @@ class TenantService:
             
         except Exception as e:
             self.db.rollback()
+
+            print("I errored here")
             logger.error("Failed to create tenant", error=str(e))
             raise
     

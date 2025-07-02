@@ -137,7 +137,7 @@ class UserService:
         return user
     
     def get_user_auth(self, user_id: str) -> Optional[UserAuthScheme]:
-        self.db.query(UserAuthScheme).filter(
+        return self.db.query(UserAuthScheme).filter(
             and_(UserAuthScheme.user_id == user_id)
         ).first()
     
@@ -146,10 +146,12 @@ class UserService:
         
         user = self.get_user_by_email(email, tenant_id)
         if not user:
+            
             return None
         
         user_auth = self.get_user_auth(user.id)
         if not user_auth:
+            
             return None
         
         if user_auth.is_locked:
