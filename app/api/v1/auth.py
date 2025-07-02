@@ -12,7 +12,7 @@ from app.schemas.auth import Token, LoginRequest, RegisterRequest, UserProfile
 from app.schemas.tenant import TenantCreate
 from app.services.user import UserService
 from app.services.tenant import TenantService
-from app.api.deps import get_current_active_user
+from app.api.deps import  get_current_user
 
 logger = structlog.get_logger()
 router = APIRouter()
@@ -140,7 +140,7 @@ async def login(
 @router.post("/logout")
 async def logout(
     request: Request,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Logout user (client-side token invalidation)"""
     
@@ -155,14 +155,14 @@ async def logout(
 
 @router.get("/me", response_model=UserProfile)
 async def get_current_user_profile(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Get current user profile"""
     return current_user
 
 @router.post("/refresh")
 async def refresh_token(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Refresh JWT token"""
     

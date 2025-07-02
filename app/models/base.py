@@ -8,6 +8,8 @@ Base = declarative_base()
 class BaseModel(Base):
     """Base model with common fields for all entities"""
     __abstract__ = True
+
+    __allow_unmapped__ = True
     
     @declared_attr
     def __tablename__(cls):
@@ -21,6 +23,7 @@ class BaseModel(Base):
 class TenantIsolatedModel(BaseModel):
     """Base model for tenant-isolated entities"""
     __abstract__ = True
+    __allow_unmapped__ = True
     
     tenant_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID as string for tenant isolation
     

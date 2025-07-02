@@ -28,7 +28,7 @@ class UserAuthScheme(BaseModel):
     last_login = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)    
 
     
-    user = relationship("User")
+    user = relationship("User", back_populates="auth_scheme")
 
     # we should probably have a unique constraint on user_id+authscheme 
     

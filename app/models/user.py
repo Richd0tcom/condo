@@ -2,6 +2,7 @@ from sqlalchemy import UUID, Column, Integer, String, Boolean, ForeignKey, Enum 
 from sqlalchemy.orm import relationship
 import enum
 
+from app.models.auth_schema import UserAuthScheme
 from app.models.base import TenantIsolatedModel
 
 class UserRole(str, enum.Enum):
@@ -31,6 +32,8 @@ class User(TenantIsolatedModel):
 
 
     tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"))
+
+    auth_scheme: UserAuthScheme = relationship("UserAuthScheme")
     
     __table_args__ = (
         UniqueConstraint('email', 'tenant_id', name='uq_user_email_tenant'),

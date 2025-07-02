@@ -6,7 +6,7 @@ import structlog
 from app.core.database import get_db
 from app.schemas.user import UserResponse, UserCreate, UserUpdate, PasswordChange
 from app.services.user import UserService
-from app.api.deps import get_current_active_user, get_current_tenant_admin
+from app.api.deps import get_current_tenant_admin, get_current_user
 from app.models.user import User
 from app.core.security import verify_password, get_password_hash
 
@@ -107,7 +107,7 @@ async def update_user(
 @router.post("/change-password")
 async def change_password(
     password_data: PasswordChange,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Change current user's password"""
@@ -130,7 +130,7 @@ async def change_password(
 @router.put("/profile", response_model=UserResponse)
 async def update_profile(
     profile_data: UserUpdate,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update current user's profile"""

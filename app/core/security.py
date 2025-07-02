@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pytz
 from typing import Any, Union, Optional
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
 import bcrypt
 import secrets
@@ -42,6 +42,14 @@ def verify_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         token_data = payload.get("sub")
+
+        print("subby", token_data)
         return token_data
-    except JWTError:
+    
+    except ExpiredSignatureError:
+        print("expiredddd", )
         return None
+    except JWTError:
+        
+        return None
+    

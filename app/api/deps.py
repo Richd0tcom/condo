@@ -36,7 +36,7 @@ async def get_current_user(
     )
     
     try:
-        
+        print("creddiiii", credentials.credentials)
         token_data = verify_token(credentials.credentials)
         if token_data is None:
             raise credentials_exception
@@ -45,22 +45,30 @@ async def get_current_user(
         tenant_id = token_data.split(":")[1]
         
         user_service = UserService(db)
-        user = user_service.get_user_by_id(user_id, tenant_id)
+        user = user_service.get_user_auth_by_id(user_id, tenant_id)
+        
         
         if user is None:
+            print("userrrr", user)
             raise credentials_exception
-            
-        if not user.is_active:
+        
+
+
+        if user.auth_scheme.is_locked:
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail="User account is locked"
+            )  
+
+        # check user session from cache
+        is_active = True
+        if not is_active: #this is a place holder
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User account is deactivated"
             )
             
-        if user.is_locked:
-            raise HTTPException(
-                status_code=status.HTTP_423_LOCKED,
-                detail="User account is locked"
-            )
+
         
         request.state.user_id = user.id
         request.state.tenant_id = user.tenant_id
@@ -69,7 +77,7 @@ async def get_current_user(
         logger.info("User authenticated", 
                    user_id=user.id, 
                    tenant_id=user.tenant_id,
-                   role=user.role.value)
+                   role=user.role)
         
         return user
         
@@ -79,19 +87,9 @@ async def get_current_user(
         logger.error("Authentication error", error=str(e))
         raise credentials_exception
 
-async def get_current_active_user(
-    current_user: User = Depends(get_current_user)
-) -> User:
-    """Get current active user"""
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
-        )
-    return current_user
 
 async def get_current_tenant_admin(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ) -> User:
     """Require tenant admin or super admin role"""
     if current_user.role not in [UserRole.TENANT_ADMIN, UserRole.SUPER_ADMIN]:
@@ -102,7 +100,7 @@ async def get_current_tenant_admin(
     return current_user
 
 async def get_current_super_admin(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_user)
 ) -> User:
     """Require super admin role"""
     if current_user.role != UserRole.SUPER_ADMIN:

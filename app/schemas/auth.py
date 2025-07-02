@@ -1,5 +1,6 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
 
 class TokenData(BaseModel):
@@ -26,13 +27,12 @@ class RegisterRequest(BaseModel):
 
 
 class UserProfile(BaseModel):
-    id: int
+    id: UUID
     email: EmailStr
     first_name: str
     last_name: str
     role: str
-    tenant_id: str
-    is_verified: bool
+    tenant_id: Union[UUID, str]
     created_at: datetime
     
     class Config:

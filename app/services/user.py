@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_, join 
 from typing import Optional, List
 import structlog
 
@@ -27,6 +27,15 @@ class UserService:
         """Get user by ID within tenant context"""
         return self.db.query(User).filter(
             and_(User.id == user_id, User.tenant_id == tenant_id)
+        ).first()
+
+    def get_user_auth_by_id(self, user_id: int, tenant_id: str) -> Optional[User]:
+        print("tenant_id", tenant_id)
+        """Get user with auth by ID within tenant context"""
+        return self.db.query(User).filter(
+            and_(User.id == user_id, User.tenant_id == tenant_id)
+        ).options(
+           joinedload(User.auth_scheme)
         ).first()
     
     #protect this

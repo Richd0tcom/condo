@@ -6,7 +6,7 @@ import structlog
 from app.core.database import get_db
 from app.schemas.tenant import TenantResponse, TenantUpdate
 from app.services.tenant import TenantService
-from app.api.deps import get_current_active_user, get_current_tenant_admin, get_current_super_admin
+from app.api.deps import  get_current_tenant_admin, get_current_super_admin, get_current_user
 from app.models.user import User
 
 logger = structlog.get_logger()
@@ -32,7 +32,7 @@ async def list_tenants(
 
 @router.get("/current", response_model=TenantResponse)
 async def get_current_tenant(
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get current user's tenant"""
