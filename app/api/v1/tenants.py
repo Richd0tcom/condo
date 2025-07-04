@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import structlog
 
-from app.core.database import get_db
+from app.core.database import get_db, get_tenant_db
 from app.schemas.tenant import TenantResponse, TenantUpdate
 from app.services.tenant import TenantService
 from app.api.deps import  get_current_tenant_admin, get_current_super_admin, get_current_user
@@ -52,7 +52,7 @@ async def get_current_tenant(
 async def update_current_tenant(
     tenant_data: TenantUpdate,
     current_user: User = Depends(get_current_tenant_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_tenant_db)
 ):
     """Update current tenant (Admin only)"""
     

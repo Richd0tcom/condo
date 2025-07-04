@@ -21,7 +21,7 @@ class TenantService:
     
     def get_tenant_by_id(self, tenant_id: str) -> Optional[Tenant]:
         """Get tenant by tenant_id"""
-        return self.db.query(Tenant).filter(Tenant.tenant_id == tenant_id).first()
+        return self.db.query(Tenant).filter(Tenant.id == tenant_id).first()
     
     def get_tenant_by_slug(self, slug: str) -> Optional[Tenant]:
         """Get tenant by slug"""
@@ -34,6 +34,9 @@ class TenantService:
     def get_all_tenants(self, skip: int = 0, limit: int = 100) -> List[Tenant]:
         """Get all tenants with pagination (super admin only)"""
         return self.db.query(Tenant).offset(skip).limit(limit).all()
+    
+    def get_all_users_in_tenant(self, tenant_id: str) -> List[User]:
+        pass
     
     def create_tenant_with_admin(self, tenant_data: TenantCreate) -> Tenant:
         """Create tenant with initial admin user"""

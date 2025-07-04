@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -19,11 +20,10 @@ class TenantUpdate(BaseModel):
 
 
 class TenantResponse(TenantBase):
-    id: int
-    tenant_id: str
+    id: UUID
     plan_type: str
     employee_count: int
-    sso_config: Dict[str, Any]
+    # sso_config: Optional[Dict[str, Any]]
     created_at: datetime
     
     class Config:

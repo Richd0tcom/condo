@@ -40,6 +40,7 @@ def get_tenant_db(request: Request) -> Session:
     db = SessionLocal()
     try:
         tenant_id = getattr(request.state, "tenant_id", None)
+        print("tennnnnn from requesterrrrr", tenant_id)
         if tenant_id:
             db.execute(f"SET app.current_tenant = '{tenant_id}'")
         yield db
@@ -57,12 +58,12 @@ def get_org_db(request: Request) -> Session:
     """
     db = SessionLocal()
     try:
-        tenant_id = getattr(request.state, "tenant_id", None)
-        if tenant_id:
-            db.execute(f"SET app.current_tenant = '{tenant_id}'")
+        org_id = getattr(request.state, "tenant_id", None)
+        if org_id:
+            db.execute(f"SET app.current_org = '{org_id}'")
         yield db
     except Exception as e:
-        logger.error(f"Tenant DB session error: {e}")
+        logger.error(f"Org DB session error: {e}")
         db.rollback()
         raise
     finally:
