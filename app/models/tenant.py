@@ -20,7 +20,7 @@ class Tenant(BaseModel):
     
     
     is_verified = Column(Boolean, default=False)
-    
+    # is_active = Column(Boolean, default=False)
   
     users = relationship("User", cascade="all, delete-orphan")
     

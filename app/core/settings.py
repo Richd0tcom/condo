@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
+
+    EXTERNAL_USER_SERVICE_URL: str = "http://localhost:8001"
+    EXTERNAL_PAYMENT_SERVICE_URL: str = "http://localhost:8002"
+    EXTERNAL_COMMS_SERVICE_URL: str = "http://localhost:8003"
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

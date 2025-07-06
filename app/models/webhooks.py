@@ -29,7 +29,7 @@ class EventType(str, Enum):
     EMAIL_BOUNCED = "email.bounced"
     EMAIL_FAILED = "email.failed"
 
-class WebhookEvent(BaseModel):
+class WebhookEventDB(BaseModel):
     __tablename__ = "webhook_events"
 
     service_name = Column(String, nullable=False, index=True)

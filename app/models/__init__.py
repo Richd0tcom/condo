@@ -13,6 +13,5 @@ from app.models.tenant import Tenant
 from app.models.tenant_sso_config import TenantSSOConfig
 from app.models.user import User
 from app.models.vendor import Vendor, VendorEvent
-from app.models.webhooks import WebhookEvent
+from app.models.webhooks import WebhookEventDB, WebhookStatus
 from app.models.workflow_templates import WorkflowTemplate
-from app.models.webhooks import WebhookEvent, WebhookStatus

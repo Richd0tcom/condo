@@ -5,11 +5,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 import logging
+from app.integrations.processors import EventTypeProcessor
 from app.integrations.webhook import WebhookPayload, WebhookSource
-from app.core.database import get_db
+from app.core.database import get_db_session, get_async_db_session  # Import the context managers
 from sqlalchemy.orm import Session
 import hashlib
-from app.models import Tenant, AuditLog, WebhookEvent, WebhookStatus
+from app.models import Tenant, AuditLog, WebhookStatus
+from app.models.webhooks import EventType, WebhookEventDB
+from app.schemas.webhooks import ProcessingResult
 
 logger = logging.getLogger(__name__)
 
@@ -20,16 +23,10 @@ class EventStatus(Enum):
     FAILED = "failed"
     RETRY = "retry"
 
-@dataclass
-class ProcessingResult:
-    success: bool
-    error_message: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    retry_after_seconds: Optional[int] = None
 
 class EventProcessor:
     def __init__(self):
-        self.processors: Dict[str, Callable] = {}
+        self.processors = EventTypeProcessor().processors
         self.middleware: List[Callable] = []
         self.deduplication_cache: Dict[str, datetime] = {} #TODO: change to use redis
         self._lock = asyncio.Lock()
@@ -58,14 +55,13 @@ class EventProcessor:
                 return True
             
             try:
-                async with get_db() as session:
-                    result = await session.execute(
-                        session.query(WebhookEvent.id)
-                        .filter(WebhookEvent.idempotency_key == event_hash)
-                        .limit(1)
-                    )
+                # Use context manager for manual database access
+                with get_db_session() as db:
+                    result = db.query(WebhookEventDB.id).filter(
+                        WebhookEventDB.idempotency_key == event_hash
+                    ).first()
                     
-                    if result.scalar():
+                    if result:
                         self.deduplication_cache[event_hash] = payload.timestamp
                         return True
             
@@ -80,22 +76,18 @@ class EventProcessor:
         event_hash = self.generate_event_hash(payload)
         
         try:
-            async with get_db() as session:
-                existing_event = await session.execute(
-                    session.query(WebhookEvent)
-                    .filter(WebhookEvent.idempotency_key == event_hash)
-                )
-                existing_event = existing_event.scalar_one_or_none()
+            with get_db_session() as db:
+                existing_event = db.query(WebhookEventDB).filter(
+                    WebhookEventDB.idempotency_key == event_hash
+                ).first()
                 
                 if existing_event:
-                    
-                    existing_event.status = WebhookStatus.COMPLETED if result.success else "failed"
+                    existing_event.status = WebhookStatus.COMPLETED if result.success else WebhookStatus.FAILED
                     existing_event.processed_at = datetime.now(timezone.utc)
                     existing_event.data = result.metadata
                 else:
-                    
-                    new_event = WebhookEvent(
-                        id=payload.event_id,
+                    new_event = WebhookEventDB(
+                        # id=payload.event_id,
                         service_name=payload.source.value,
                         event_type=payload.event_type,
                         payload=payload.data,
@@ -105,13 +97,13 @@ class EventProcessor:
                         error_message=result.error_message,
                         completed_at=datetime.now(timezone.utc)
                     )
-                    session.add(new_event)
-                
-                await session.commit()
+                    db.add(new_event)
+                # Commit happens automatically in context manager
             
             async with self._lock:
                 self.deduplication_cache[event_hash] = payload.timestamp
                 
+                # Cache cleanup
                 if len(self.deduplication_cache) > 1000:
                     oldest_keys = sorted(
                         self.deduplication_cache.keys(),
@@ -149,6 +141,7 @@ class EventProcessor:
         try:
             processed_payload = await self.apply_middleware(payload)
             
+            
             processor = self.processors.get(processed_payload.event_type)
             if not processor:
                 logger.warning(f"No processor found for event type: {processed_payload.event_type}")
@@ -159,6 +152,8 @@ class EventProcessor:
             
             logger.info(f"Processing event: {processed_payload.event_type} - {processed_payload.event_id}")
             result = await processor(processed_payload)
+
+            print("Processing webhook 222222222...") 
             
             await self.mark_event_processed(payload, result)
             
@@ -189,13 +184,13 @@ async def tenant_validation_middleware(payload: WebhookPayload) -> WebhookPayloa
     """Validate tenant information in webhook payload"""
     if payload.tenant_id:
         try:
-            async with get_db() as session:
-                result = await session.execute(
-                    session.query(Tenant.id)
-                    .filter(Tenant.id == payload.tenant_id, Tenant.is_active == True)
-                )
+            with get_db_session() as db:
+                result = db.query(Tenant.id).filter(
+                    Tenant.id == payload.tenant_id, 
+                    # Tenant.is_active == True
+                ).first()
                 
-                if not result.scalar():
+                if not result:
                     raise ValueError(f"Invalid or inactive tenant: {payload.tenant_id}")
         
         except Exception as e:
@@ -207,20 +202,21 @@ async def tenant_validation_middleware(payload: WebhookPayload) -> WebhookPayloa
 async def audit_logging_middleware(payload: WebhookPayload) -> WebhookPayload:
     """Log webhook events for audit purposes"""
     try:
-        async with get_db() as session:
+        with get_db_session() as db:
             audit_entry = AuditLog(
                 tenant_id=payload.tenant_id,
                 event_type=f"webhook_received_{payload.event_type}",
                 resource_type="webhook",
-                resource_id=payload.event_id,
-                data={
+                
+                data= {
+                    "id": payload.event_id,
                     "source": payload.source.value,
                     "timestamp": payload.timestamp.isoformat()
                 }
             )
-            session.add(audit_entry)
-            await session.commit()
-    
+            db.add(audit_entry)
+            # Commit happens automatically in context manager
+
     except Exception as e:
         logger.error(f"Audit logging failed: {e}")
     

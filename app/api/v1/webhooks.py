@@ -9,7 +9,7 @@ router = APIRouter()
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
 
-@router.post("/webhooks/{service_name}")
+@router.post("/{service_name}")
 async def receive_webhook(
     service_name: str,
     request: Request
@@ -31,6 +31,7 @@ async def receive_webhook(
     timestamp = headers.get(config.timestamp_header)
 
     try:
+        
         payload = await webhook_receiver.process_webhook(
             request=request,
             source=source,
@@ -53,7 +54,7 @@ async def receive_webhook(
     return {"status": "ok", "event_id": payload.event_id}
 
 
-@router.get("/webhooks/health")
+@router.get("/health")
 async def webhook_health_check():
     """Health check endpoint for webhook processing system"""
     

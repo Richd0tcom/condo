@@ -45,11 +45,11 @@ class ServiceOrchestrator:
                 
         logger.info("Mock services initialized")
     
-    def register_webhooks(self, main_service_url: str = "http://localhost:8000"):
+    def register_webhooks(self, main_service_url: str = "http://localhost:8000/api/v1"):
         """Register webhook endpoints with mock services"""
         webhook_configs = {
             "user_management": WebhookConfig(
-                url=f"{main_service_url}/webhooks/users",
+                url=f"{main_service_url}/webhooks/user_management",
                 secret="user_webhook_secret_key",
                 events=[
                     WebhookEventType.USER_CREATED,
@@ -58,7 +58,7 @@ class ServiceOrchestrator:
                 ]
             ),
             "payment": WebhookConfig(
-                url=f"{main_service_url}/webhooks/payments",
+                url=f"{main_service_url}/webhooks/payment_service",
                 secret="payment_webhook_secret_key",
                 events=[
                     WebhookEventType.SUBSCRIPTION_CREATED,
@@ -68,7 +68,7 @@ class ServiceOrchestrator:
                 ]
             ),
             "communication": WebhookConfig(
-                url=f"{main_service_url}/webhooks/communications",
+                url=f"{main_service_url}/webhooks/communication_service",
                 secret="comm_webhook_secret_key",
                 events=[
                     WebhookEventType.EMAIL_SENT,

@@ -24,7 +24,7 @@ class TestMockServices:
     @pytest.fixture
     def tenant_id(self):
         """Generate unique tenant ID for each test"""
-        return f"test-tenant-{uuid.uuid4()}"
+        return f"{uuid.uuid4()}"
     
     async def test_user_management_service(self, tenant_id: str):
         """Test user management service CRUD operations"""

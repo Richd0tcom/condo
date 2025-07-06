@@ -47,7 +47,6 @@ class MockUser(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
     name: str
-    status: UserStatus = UserStatus.ACTIVE
     tenant_id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -112,6 +111,8 @@ class MockServiceRegistry:
         """Send webhook to registered endpoints"""
         if service_name not in self.webhooks:
             return
+
+        print("I rannnnnnnnnnnn")
             
         for webhook_config in self.webhooks[service_name]:
             if not webhook_config.active or event.event_type not in webhook_config.events:
@@ -119,8 +120,8 @@ class MockServiceRegistry:
                 
             try:
                 # Add signature for webhook verification
-                payload = event.dict()
-                signature = self._generate_signature(json.dumps(payload), webhook_config.secret)
+                payload = event.model_dump(mode='json')
+                signature = self._generate_signature(json.dumps(payload, sort_keys=True), webhook_config.secret)
                 
                 headers = {
                     "Content-Type": "application/json",
@@ -136,6 +137,7 @@ class MockServiceRegistry:
                         headers=headers,
                         timeout=30.0
                     )
+                    print("eventoooo", event)
                     
                     if response.status_code != 200:
                         print(f"Webhook failed for {webhook_config.url}: {response.status_code}")
@@ -170,7 +172,7 @@ class MockUserManagementService:
         @self.app.post("/users", response_model=MockUser)
         async def create_user(user_data: MockUser, background_tasks: BackgroundTasks):
             # Simulate processing delay
-            await asyncio.sleep(random.uniform(0.1, 0.5))
+            await asyncio.sleep(random.uniform(1, 5))
             
             self.registry.users[user_data.id] = user_data
             
@@ -178,7 +180,7 @@ class MockUserManagementService:
             event = WebhookEvent(
                 event_type=WebhookEventType.USER_CREATED,
                 tenant_id=user_data.tenant_id,
-                data=user_data.dict()
+                data=user_data.model_dump(mode='json')
             )
             
             background_tasks.add_task(
@@ -199,7 +201,7 @@ class MockUserManagementService:
                 raise HTTPException(status_code=404, detail="User not found")
             
             # Simulate processing delay
-            await asyncio.sleep(random.uniform(0.1, 0.5))
+            await asyncio.sleep(random.uniform(1, 5))
             
             user_data.updated_at = datetime.utcnow()
             self.registry.users[user_id] = user_data
@@ -208,7 +210,7 @@ class MockUserManagementService:
             event = WebhookEvent(
                 event_type=WebhookEventType.USER_UPDATED,
                 tenant_id=user_data.tenant_id,
-                data=user_data.dict()
+                data=user_data.model_dump(mode='json')
             )
             
             background_tasks.add_task(
@@ -264,11 +266,11 @@ class MockPaymentService:
             event = WebhookEvent(
                 event_type=WebhookEventType.SUBSCRIPTION_CREATED,
                 tenant_id=sub_data.tenant_id,
-                data=sub_data.dict()
+                data=sub_data.model_dump(mode='json')
             )
             
             background_tasks.add_task(
-                self.registry.send_webhook, "payment", event
+                self.registry.send_webhook, "payment_service", event
             )
             
             return sub_data
@@ -306,7 +308,7 @@ class MockPaymentService:
             )
             
             background_tasks.add_task(
-                self.registry.send_webhook, "payment", event
+                self.registry.send_webhook, "payment_service", event
             )
             
             return result
@@ -329,11 +331,11 @@ class MockPaymentService:
             event = WebhookEvent(
                 event_type=WebhookEventType.SUBSCRIPTION_UPDATED,
                 tenant_id=subscription.tenant_id,
-                data=subscription.dict()
+                data=subscription.model_dump(mode='json')
             )
             
             background_tasks.add_task(
-                self.registry.send_webhook, "payment", event
+                self.registry.send_webhook, "payment_service", event
             )
             
             return subscription
@@ -363,11 +365,11 @@ class MockCommunicationService:
             event = WebhookEvent(
                 event_type=WebhookEventType.EMAIL_SENT,
                 tenant_id=notification.tenant_id,
-                data=notification.dict()
+                data=notification.model_dump(mode='json')
             )
             
             background_tasks.add_task(
-                self.registry.send_webhook, "communication", event
+                self.registry.send_webhook, "communication_service", event
             )
             
             # Schedule delivery status update
@@ -416,7 +418,7 @@ class MockCommunicationService:
             data=notification.dict()
         )
         
-        await self.registry.send_webhook("communication", event)
+        await self.registry.send_webhook("communication_service", event)
 
 # Service Discovery and Configuration
 class MockServiceDiscovery:
@@ -529,7 +531,7 @@ class WebhookPayloadGenerator:
             data=notification_data
         )
 
-# Testing utilities
+
 class MockServiceTester:
     def __init__(self, service_discovery: MockServiceDiscovery):
         self.service_discovery = service_discovery
@@ -538,7 +540,7 @@ class MockServiceTester:
         """Test complete user service integration"""
         service_url = self.service_discovery.get_service_url("user_management")
         
-        # Create user
+        
         user_data = {
             "email": "test@example.com",
             "name": "Test User",

@@ -11,6 +11,7 @@ class BaseModel(Base):
 
     __allow_unmapped__ = True
     
+    
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
