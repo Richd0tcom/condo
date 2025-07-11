@@ -1,18 +1,19 @@
 from celery import Task
+import structlog
 from app.core.database import get_db
 from sqlalchemy import text
 from datetime import timedelta
 
 from app.tasks.celery import celery_app
 from app.integrations.webhook import WebhookPayload, WebhookSource
-from app.integrations.event_pipeline import event_processor, ProcessingResult
+from app.core.event_pipeline import event_emitter, ProcessingResult
 import logging
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any
 import asyncio
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class CallbackTask(Task):
     """Custom Celery task with callbacks for success/failure"""
@@ -45,7 +46,7 @@ def process_webhook_event(self, webhook_data: Dict[str, Any]) -> Dict[str, Any]:
         asyncio.set_event_loop(loop)
         
         try:
-            result = loop.run_until_complete(event_processor.process_event(payload))
+            result = loop.run_until_complete(event_emitter.emit_future(payload.event_type, payload))
         finally:
             loop.close()
         

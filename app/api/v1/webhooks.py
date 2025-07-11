@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBearer
 import logging
+
+import structlog
+from app.core.event_pipeline import event_emitter
 from app.integrations.webhook import webhook_receiver, WebhookSource, WebhookSignatureError, WebhookTimestampError
-from app.integrations.event_pipeline import event_processor
 from app.tasks import celery as celery_app
 
 router = APIRouter()
 security = HTTPBearer()
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 @router.post("/{service_name}")
 async def receive_webhook(
@@ -47,10 +49,8 @@ async def receive_webhook(
         logger.error(f"Webhook processing error: {e}")
         raise HTTPException(status_code=400, detail="Invalid webhook payload")
 
-    result = await event_processor.process_event(payload)
-    if not result.success:
-        logger.error(f"Event processing failed: {result.error_message}")
-        raise HTTPException(status_code=500, detail=result.error_message)
+    event_emitter.emit_future(payload.event_type, payload)
+
     return {"status": "ok", "event_id": payload.event_id}
 
 

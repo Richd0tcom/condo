@@ -1,4 +1,5 @@
 import asyncio
+import structlog
 import uvicorn
 import threading
 from contextlib import asynccontextmanager
@@ -6,17 +7,18 @@ from fastapi import FastAPI, BackgroundTasks
 from typing import Dict, List, Any
 import logging
 
+from app.models.webhooks import EventType
+
 from .mock_services import (
     MockUserManagementService,
     MockPaymentService, 
     MockCommunicationService,
     MockServiceRegistry,
     MockServiceDiscovery,
-    WebhookConfig,
-    WebhookEventType
+    WebhookConfig
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class ServiceOrchestrator:
     """Orchestrates all mock external services"""
@@ -52,28 +54,28 @@ class ServiceOrchestrator:
                 url=f"{main_service_url}/webhooks/user_management",
                 secret="user_webhook_secret_key",
                 events=[
-                    WebhookEventType.USER_CREATED,
-                    WebhookEventType.USER_UPDATED,
-                    WebhookEventType.USER_DELETED
+                    EventType.USER_CREATED,
+                    EventType.USER_UPDATED,
+                    EventType.USER_DELETED
                 ]
             ),
             "payment": WebhookConfig(
                 url=f"{main_service_url}/webhooks/payment_service",
                 secret="payment_webhook_secret_key",
                 events=[
-                    WebhookEventType.SUBSCRIPTION_CREATED,
-                    WebhookEventType.SUBSCRIPTION_UPDATED,
-                    WebhookEventType.PAYMENT_SUCCEEDED,
-                    WebhookEventType.PAYMENT_FAILED
+                    EventType.SUBSCRIPTION_CREATED,
+                    EventType.SUBSCRIPTION_UPDATED,
+                    EventType.PAYMENT_SUCCEEDED,
+                    EventType.PAYMENT_FAILED
                 ]
             ),
             "communication": WebhookConfig(
                 url=f"{main_service_url}/webhooks/communication_service",
                 secret="comm_webhook_secret_key",
                 events=[
-                    WebhookEventType.EMAIL_SENT,
-                    WebhookEventType.EMAIL_DELIVERED,
-                    WebhookEventType.EMAIL_FAILED
+                    EventType.EMAIL_SENT,
+                    EventType.EMAIL_DELIVERED,
+                    EventType.EMAIL_FAILED
                 ]
             )
         }

@@ -9,12 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 import hashlib
 
+import structlog
+
 from app.core.database import get_db
 from app.models.sync import SyncConfiguration, SyncStatus, DataSyncLog, ConflictResolution
 from app.models.organization import Organization
 from app.integrations.external_client import ExternalApiClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class SyncDirection(str, Enum):
     INBOUND = "inbound"

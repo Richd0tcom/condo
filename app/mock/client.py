@@ -5,9 +5,11 @@ from datetime import datetime
 import logging
 from contextlib import asynccontextmanager
 
+import structlog
+
 from .config import mock_service_config
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class ExternalServiceClient:
     """HTTP client for external service interactions with retry logic"""

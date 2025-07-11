@@ -45,7 +45,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on conflict_resolutions \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING ( \
+        current_setting('app.is_super_admin', true) = 'true' \
+        OR id = current_setting('app.current_org')::uuid\
+    );",
     )
 
 
@@ -116,7 +119,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on organizations \
-            USING (id = current_setting('app.current_org')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR id = current_setting('app.current_org')::uuid\
+    );",
     )
 
 
@@ -160,7 +166,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on sync_configurations \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR id = current_setting('app.current_org')::uuid\
+    );",
     )
 
 
@@ -192,7 +201,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on sync_status \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING ( \
+        current_setting('app.is_super_admin', true) = 'true' \
+        OR id = current_setting('app.current_org')::uuid \
+    );",
     )
 
 
@@ -219,7 +231,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY tenant_isolation on tenants \
-            USING (id = current_setting('app.current_tenant')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR id = current_setting('app.current_tenant')::uuid\
+    );",
     )
 
 
@@ -289,7 +304,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on employee_provisioning \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING ( \
+        current_setting('app.is_super_admin', true) = 'true' \
+        OR id = current_setting('app.current_org')::uuid \
+    );",
     )
 
 
@@ -313,7 +331,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on organization_integrations \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING ( \
+        current_setting('app.is_super_admin', true) = 'true' \
+        OR id = current_setting('app.current_org')::uuid \
+    );",
     )
 
 
@@ -337,7 +358,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY org_isolation on organization_settings \
-            USING (organization_id = current_setting('app.current_org')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR id = current_setting('app.current_org')::uuid \
+    );",
     )
 
 
@@ -379,7 +403,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY tenant_isolation on tenant_sso_config \
-            USING (tenant_id = current_setting('app.current_tenant')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR tenant_id = current_setting('app.current_tenant')::uuid\
+    );",
     )
 
 
@@ -409,7 +436,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY tenant_isolation on users \
-            USING (tenant_id = current_setting('app.current_tenant')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR tenant_id = current_setting('app.current_tenant')::uuid\
+    );",
     )
 
 
@@ -455,7 +485,10 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE POLICY tenant_isolation on audit_logs \
-            USING (tenant_id = current_setting('app.current_tenant')::uuid);",
+            USING (\
+        current_setting('app.is_super_admin', true) = 'true'\
+        OR tenant_id = current_setting('app.current_tenant')::uuid\
+    );",
     )
 
 

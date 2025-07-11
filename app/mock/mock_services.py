@@ -11,6 +11,9 @@ import httpx
 import json
 from contextlib import asynccontextmanager
 
+from app.models.webhooks import EventType
+from app.schemas.webhooks import WebhookEvent
+
 # Mock Service Models
 class UserStatus(str, Enum):
     ACTIVE = "active"
@@ -29,18 +32,7 @@ class NotificationStatus(str, Enum):
     FAILED = "failed"
     BOUNCED = "bounced"
 
-# Webhook Event Types
-class WebhookEventType(str, Enum):
-    USER_CREATED = "user.created"
-    USER_UPDATED = "user.updated"
-    USER_DELETED = "user.deleted"
-    SUBSCRIPTION_CREATED = "subscription.created"
-    SUBSCRIPTION_UPDATED = "subscription.updated"
-    PAYMENT_SUCCEEDED = "payment.succeeded"
-    PAYMENT_FAILED = "payment.failed"
-    EMAIL_SENT = "email.sent"
-    EMAIL_DELIVERED = "email.delivered"
-    EMAIL_FAILED = "email.failed"
+
 
 # Request/Response Models
 class MockUser(BaseModel):
@@ -77,20 +69,14 @@ class MockNotification(BaseModel):
     delivered_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class WebhookEvent(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    event_type: WebhookEventType
-    tenant_id: str
-    data: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    signature: Optional[str] = None
+
 
 # Webhook Configuration
 @dataclass
 class WebhookConfig:
     url: str
     secret: str
-    events: List[WebhookEventType]
+    events: List[EventType]
     active: bool = True
 
 # Mock Service Registry
@@ -178,7 +164,7 @@ class MockUserManagementService:
             
             # Send webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.USER_CREATED,
+                event_type=EventType.USER_CREATED,
                 tenant_id=user_data.tenant_id,
                 data=user_data.model_dump(mode='json')
             )
@@ -208,7 +194,7 @@ class MockUserManagementService:
             
             # Send webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.USER_UPDATED,
+                event_type=EventType.USER_UPDATED,
                 tenant_id=user_data.tenant_id,
                 data=user_data.model_dump(mode='json')
             )
@@ -229,7 +215,7 @@ class MockUserManagementService:
             
             # Send webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.USER_DELETED,
+                event_type=EventType.USER_DELETED,
                 tenant_id=user.tenant_id,
                 data={"id": user_id, "tenant_id": user.tenant_id}
             )
@@ -264,7 +250,7 @@ class MockPaymentService:
             
             # Send webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.SUBSCRIPTION_CREATED,
+                event_type=EventType.SUBSCRIPTION_CREATED,
                 tenant_id=sub_data.tenant_id,
                 data=sub_data.model_dump(mode='json')
             )
@@ -289,7 +275,7 @@ class MockPaymentService:
             # Random success/failure for testing
             success = random.random() > 0.2  # 80% success rate
             
-            event_type = WebhookEventType.PAYMENT_SUCCEEDED if success else WebhookEventType.PAYMENT_FAILED
+            event_type = EventType.PAYMENT_SUCCEEDED if success else EventType.PAYMENT_FAILED
             
             result = {
                 "id": str(uuid.uuid4()),
@@ -329,7 +315,7 @@ class MockPaymentService:
             
             # Send webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.SUBSCRIPTION_UPDATED,
+                event_type=EventType.SUBSCRIPTION_UPDATED,
                 tenant_id=subscription.tenant_id,
                 data=subscription.model_dump(mode='json')
             )
@@ -363,7 +349,7 @@ class MockCommunicationService:
             
             # Send initial webhook
             event = WebhookEvent(
-                event_type=WebhookEventType.EMAIL_SENT,
+                event_type=EventType.EMAIL_SENT,
                 tenant_id=notification.tenant_id,
                 data=notification.model_dump(mode='json')
             )
@@ -404,10 +390,10 @@ class MockCommunicationService:
         if success:
             notification.status = NotificationStatus.DELIVERED
             notification.delivered_at = datetime.utcnow()
-            event_type = WebhookEventType.EMAIL_DELIVERED
+            event_type = EventType.EMAIL_DELIVERED
         else:
             notification.status = NotificationStatus.FAILED
-            event_type = WebhookEventType.EMAIL_FAILED
+            event_type = EventType.EMAIL_FAILED
         
         self.registry.notifications[notification_id] = notification
         
@@ -472,7 +458,7 @@ class MockServiceDiscovery:
 # Webhook Payload Generators for Testing
 class WebhookPayloadGenerator:
     @staticmethod
-    def generate_user_event(tenant_id: str, event_type: WebhookEventType) -> WebhookEvent:
+    def generate_user_event(tenant_id: str, event_type: EventType) -> WebhookEvent:
         """Generate user-related webhook events"""
         user_data = {
             "id": str(uuid.uuid4()),
@@ -491,14 +477,14 @@ class WebhookPayloadGenerator:
         )
     
     @staticmethod
-    def generate_payment_event(tenant_id: str, event_type: WebhookEventType) -> WebhookEvent:
+    def generate_payment_event(tenant_id: str, event_type: EventType) -> WebhookEvent:
         """Generate payment-related webhook events"""
         payment_data = {
             "id": str(uuid.uuid4()),
             "subscription_id": str(uuid.uuid4()),
             "amount": round(random.uniform(10.0, 500.0), 2),
             "currency": "USD",
-            "status": "succeeded" if event_type == WebhookEventType.PAYMENT_SUCCEEDED else "failed",
+            "status": "succeeded" if event_type == EventType.PAYMENT_SUCCEEDED else "failed",
             "processed_at": datetime.utcnow().isoformat(),
             "tenant_id": tenant_id
         }
@@ -510,7 +496,7 @@ class WebhookPayloadGenerator:
         )
     
     @staticmethod
-    def generate_notification_event(tenant_id: str, event_type: WebhookEventType) -> WebhookEvent:
+    def generate_notification_event(tenant_id: str, event_type: EventType) -> WebhookEvent:
         """Generate notification-related webhook events"""
         notification_data = {
             "id": str(uuid.uuid4()),
@@ -520,9 +506,9 @@ class WebhookPayloadGenerator:
             "recipient": f"user{random.randint(1000, 9999)}@example.com",
             "subject": "Test Notification",
             "content": "This is a test notification",
-            "status": "delivered" if event_type == WebhookEventType.EMAIL_DELIVERED else "failed",
+            "status": "delivered" if event_type == EventType.EMAIL_DELIVERED else "failed",
             "sent_at": datetime.utcnow().isoformat(),
-            "delivered_at": datetime.utcnow().isoformat() if event_type == WebhookEventType.EMAIL_DELIVERED else None
+            "delivered_at": datetime.utcnow().isoformat() if event_type == EventType.EMAIL_DELIVERED else None
         }
         
         return WebhookEvent(

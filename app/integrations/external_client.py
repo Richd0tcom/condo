@@ -3,13 +3,15 @@ import asyncio
 from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass
 import logging
+
+import structlog
 from app.core.retry_util import async_retry, ExternalServiceError, RateLimitError
 from app.core.circuit_breaker import circuit_breaker, CircuitBreakerConfig
 import time
 import json
 from urllib.parse import urljoin
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 @dataclass
 class ApiClientConfig:

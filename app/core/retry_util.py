@@ -1,3 +1,4 @@
+import structlog
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -11,7 +12,7 @@ import httpx
 from typing import Callable, Any, Optional, List, Type
 import asyncio
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class RetryableError(Exception):
     """Base class for retryable errors"""

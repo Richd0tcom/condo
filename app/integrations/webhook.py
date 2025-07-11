@@ -8,7 +8,9 @@ from datetime import datetime, timezone
 import logging
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 class WebhookSource(Enum):
     USER_MANAGEMENT = "user_management"

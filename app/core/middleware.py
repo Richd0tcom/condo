@@ -77,7 +77,6 @@ class TenantContextMiddleware(BaseHTTPMiddleware):
         return response
 
 
-
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Enterprise-grade rate limiting middleware"""
     

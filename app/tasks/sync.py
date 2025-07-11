@@ -1,11 +1,12 @@
 from celery import Task
+import structlog
 from app.tasks.celery import celery_app
 from app.services.sync_engine import DataSyncEngine
 from app.core.database import get_db
 import logging
 import asyncio
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 class SyncCallbackTask(Task):
     def on_success(self, retval, task_id, args, kwargs):
