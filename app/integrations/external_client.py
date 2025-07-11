@@ -104,6 +104,9 @@ class ExternalApiClient:
             if response.status_code >= 500:
                 raise ExternalServiceError(f"Server error: {response.status_code}")
             
+            print("response status code: ",response.status_code)
+            # print("response content: ",response.content)
+            
             response.raise_for_status()
             return response
             
@@ -111,8 +114,8 @@ class ExternalApiClient:
             logger.error(f"HTTP error in {method} {endpoint}: {e}")
             raise ExternalServiceError(f"HTTP error: {e}")
     
-    @async_retry(max_attempts=3, wait_multiplier=2)
-    @circuit_breaker("external_api", failure_threshold=5, recovery_timeout=60.0)
+    # @async_retry(max_attempts=3, wait_multiplier=2)
+    # @circuit_breaker("external_api", failure_threshold=5, recovery_timeout=60.0)
     async def get(
         self,
         endpoint: str,
@@ -123,8 +126,8 @@ class ExternalApiClient:
         response = await self._make_request("GET", endpoint, params=params, headers=headers)
         return response.json()
     
-    @async_retry(max_attempts=3, wait_multiplier=2)
-    @circuit_breaker("external_api", failure_threshold=5, recovery_timeout=60.0)
+    # @async_retry(max_attempts=3, wait_multiplier=2)
+    # @circuit_breaker("external_api", failure_threshold=5, recovery_timeout=60.0)
     async def post(
         self,
         endpoint: str,

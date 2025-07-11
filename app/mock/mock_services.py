@@ -2,7 +2,7 @@ import asyncio
 import uuid
 import random
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from enum import Enum
 from dataclasses import dataclass, asdict
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
@@ -52,9 +52,9 @@ class MockSubscription(BaseModel):
     amount: float
     currency: str = "USD"
     billing_cycle: str = "monthly"
-    current_period_start: datetime
-    current_period_end: datetime
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    current_period_start: Union[datetime, str]
+    current_period_end: Union[datetime, str]
+    created_at: Union[datetime, str] = Field(default_factory=datetime.utcnow)
 
 class MockNotification(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -98,7 +98,7 @@ class MockServiceRegistry:
         if service_name not in self.webhooks:
             return
 
-        print("I rannnnnnnnnnnn")
+        print("I rannnnnnnnnnnn webhhok")
             
         for webhook_config in self.webhooks[service_name]:
             if not webhook_config.active or event.event_type not in webhook_config.events:
@@ -123,7 +123,6 @@ class MockServiceRegistry:
                         headers=headers,
                         timeout=30.0
                     )
-                    print("eventoooo", event)
                     
                     if response.status_code != 200:
                         print(f"Webhook failed for {webhook_config.url}: {response.status_code}")
@@ -275,7 +274,7 @@ class MockPaymentService:
             # Random success/failure for testing
             success = random.random() > 0.2  # 80% success rate
             
-            event_type = EventType.PAYMENT_SUCCEEDED if success else EventType.PAYMENT_FAILED
+            event_type = EventType.PAYMENT_SUCCESS if success else EventType.PAYMENT_FAILED
             
             result = {
                 "id": str(uuid.uuid4()),
@@ -484,7 +483,7 @@ class WebhookPayloadGenerator:
             "subscription_id": str(uuid.uuid4()),
             "amount": round(random.uniform(10.0, 500.0), 2),
             "currency": "USD",
-            "status": "succeeded" if event_type == EventType.PAYMENT_SUCCEEDED else "failed",
+            "status": "succeeded" if event_type == EventType.PAYMENT_SUCCESS else "failed",
             "processed_at": datetime.utcnow().isoformat(),
             "tenant_id": tenant_id
         }

@@ -13,7 +13,7 @@ from app.services.sync_engine import DataSyncEngine, SyncDirection, SyncFrequenc
 from app.tasks.sync import trigger_sync_task, batch_sync_task
 
 
-router = APIRouter(prefix="/sync", tags=["sync"])
+router = APIRouter()
 
 
 

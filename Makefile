@@ -3,7 +3,8 @@
 
 start-mock-services:
 	@echo "🚀 Starting mock external services..."
-	python app/scripts/start_mock.py
+	python -m app.scripts.start_mock
+	# python app/scripts/start_mock.py
 
 #(requires separate terminal)
 stop-mock-services:

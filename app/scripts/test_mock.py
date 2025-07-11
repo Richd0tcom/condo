@@ -128,9 +128,9 @@ class TestMockServices:
         assert "email" in user_event.data
         
         # Test payment event generation
-        payment_event = generator.generate_payment_event(tenant_id, "PAYMENT_SUCCEEDED")
+        payment_event = generator.generate_payment_event(tenant_id, "PAYMENT_SUCCESS")
         assert payment_event.tenant_id == tenant_id
-        assert payment_event.event_type == "PAYMENT_SUCCEEDED"
+        assert payment_event.event_type == "PAYMENT_SUCCESS"
         assert "amount" in payment_event.data
         
         # Test notification event generation

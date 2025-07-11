@@ -1,3 +1,4 @@
+import json
 from random import randint
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -32,6 +33,7 @@ async def call_external_user_service(db: Session = Depends(get_db)):
     config = ApiClientConfig(
         base_url=settings.EXTERNAL_USER_SERVICE_URL,
     )
+    print("BASE_URL", config.base_url)
 
     try:
         users = db.query(User).all()
@@ -59,7 +61,7 @@ async def call_external_user_service(db: Session = Depends(get_db)):
 
 
 @router.post("/payment", response_model=dict, status_code=status.HTTP_201_CREATED)
-def call_external_payment_service(db: Session = Depends(get_db)):
+async def call_external_payment_service(db: Session = Depends(get_db)):
     config = ApiClientConfig(
         base_url=settings.EXTERNAL_PAYMENT_SERVICE_URL,
     )
@@ -70,29 +72,33 @@ def call_external_payment_service(db: Session = Depends(get_db)):
 
         user = users[randint(0, len(users) - 1)]
 
+        
+
         data = {
           "tenant_id": user.tenant_id.__str__(),
           "user_id": user.id.__str__(),
           "plan_id": "1",
           "status": "active",
-          "amount": 100,
+          "amount": 100.0,
           "currency": "USD",
           "billing_cycle": "monthly",
-          "current_period_start": datetime.now(tz),
-          "current_period_end": datetime.now(tz) + timedelta(days=30),
-          "created_at": datetime.now(tz),
+          "current_period_start": datetime.now(tz).isoformat(),
+          "current_period_end": (datetime.now(tz) + timedelta(days=30)).isoformat(),
+          "created_at": datetime.now(tz).isoformat(),
         }
 
-        response = client.post("/subscriptions", data=data)
 
+        response = await client.post("/subscriptions", data=data)
+
+        # print("resssy", response)
         payment_data = {
-            "subscription_id": response.id,
-            "amount": data.amount,
+            "subscription_id": response["id"],
+            "amount": data["amount"],
             "currency": data.get("currency", "USD"),
-            "tenant_id": user.tenant_id
+            "tenant_id": user.tenant_id.__str__(),
         }
 
-        response = client.post("/payments/process", data=payment_data)
+        response = await client.post("/payments/process", data=payment_data)
         return response
 
     except Exception as e:
@@ -104,7 +110,7 @@ def call_external_payment_service(db: Session = Depends(get_db)):
 
 
 @router.post("/notifications", response_model=dict, status_code=status.HTTP_201_CREATED)
-def call_external_comms_service(db: Session = Depends(get_db)):
+async def call_external_comms_service(db: Session = Depends(get_db)):
     config = ApiClientConfig(
         base_url=settings.EXTERNAL_COMMS_SERVICE_URL,
     )
@@ -116,8 +122,8 @@ def call_external_comms_service(db: Session = Depends(get_db)):
         user = users[randint(0, len(users) - 1)]
 
         data = {
-            "tenant_id": user.tenant_id,
-            "user_id": user.id,
+            "tenant_id": user.tenant_id.__str__(),
+            "user_id": user.id.__str__(),
             "type": "email",
             "recipient": user.email,
             "subject": "Test Email",
@@ -125,7 +131,7 @@ def call_external_comms_service(db: Session = Depends(get_db)):
             "status": "pending"
         }
 
-        response = client.post("/notifications/send", data=data)
+        response = await client.post("/notifications/send", data=data)
         return response
 
     except Exception as e:

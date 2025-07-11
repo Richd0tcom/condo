@@ -5,7 +5,7 @@ from typing import Optional, Generator
 import redis
 import structlog
 
-from app.core.database import get_db
+from app.core.database import get_db, get_tenant_db
 from app.core.security import verify_token
 from app.core.settings import settings
 from app.models.user import User, UserRole
@@ -25,7 +25,7 @@ def get_redis() -> redis.Redis:
 async def get_current_user(
     request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_tenant_db)
 ) -> User:
     """Get current authenticated user with tenant context"""
     
@@ -89,6 +89,7 @@ async def get_current_user(
 
 
 async def get_current_tenant_admin(
+    request: Request,
     current_user: User = Depends(get_current_user)
 ) -> User:
     """Require tenant admin or super admin role"""
@@ -97,6 +98,9 @@ async def get_current_tenant_admin(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions. Admin role required."
         )
+    if current_user.role == UserRole.SUPER_ADMIN:
+        request.state.is_super_admin = 'true'
+
     return current_user
 
 async def get_current_super_admin(
@@ -112,7 +116,7 @@ async def get_current_super_admin(
 
 def get_tenant_context(
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_tenant_db)
 ) -> Optional[Tenant]:
     """Get tenant context from request"""
     tenant_id = getattr(request.state, 'tenant_id', None)

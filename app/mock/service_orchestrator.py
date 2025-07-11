@@ -41,8 +41,9 @@ class ServiceOrchestrator:
         
         # Add health check endpoints to all services
         for service_name, service in self.services.items():
+            print("healthy service: ", service_name)
             @service.app.get("/health")
-            async def health_check():
+            async def health_check(service_name: str = service_name):
                 return {"status": "healthy", "service": service_name}
                 
         logger.info("Mock services initialized")
@@ -59,21 +60,21 @@ class ServiceOrchestrator:
                     EventType.USER_DELETED
                 ]
             ),
-            "payment": WebhookConfig(
+            "payment_service": WebhookConfig(
                 url=f"{main_service_url}/webhooks/payment_service",
                 secret="payment_webhook_secret_key",
                 events=[
                     EventType.SUBSCRIPTION_CREATED,
                     EventType.SUBSCRIPTION_UPDATED,
-                    EventType.PAYMENT_SUCCEEDED,
+                    EventType.PAYMENT_SUCCESS,
                     EventType.PAYMENT_FAILED
                 ]
             ),
-            "communication": WebhookConfig(
+            "communication_service": WebhookConfig(
                 url=f"{main_service_url}/webhooks/communication_service",
                 secret="comm_webhook_secret_key",
                 events=[
-                    EventType.EMAIL_SENT,
+                    EventType.EMAIL_BOUNCED,
                     EventType.EMAIL_DELIVERED,
                     EventType.EMAIL_FAILED
                 ]

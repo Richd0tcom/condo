@@ -116,7 +116,7 @@ def generate_events(
         event_types = {
             "user_created": ("user_management", "USER_CREATED"),
             "user_updated": ("user_management", "USER_UPDATED"),
-            "payment_succeeded": ("payment", "PAYMENT_SUCCEEDED"),
+            "payment_success": ("payment", "PAYMENT_SUCCESS"),
             "payment_failed": ("payment", "PAYMENT_FAILED"),
             "email_delivered": ("communication", "EMAIL_DELIVERED"),
             "email_failed": ("communication", "EMAIL_FAILED")

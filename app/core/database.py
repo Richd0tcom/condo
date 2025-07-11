@@ -24,7 +24,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-def get_db() -> Session:
+def get_db() -> Generator[Session, None, None]:
     """Database dependency for FastAPI"""
     db = SessionLocal()
     try:
@@ -36,7 +36,7 @@ def get_db() -> Session:
     finally:
         db.close()
 
-def get_tenant_db(request: Request) -> Session:
+def get_tenant_db(request: Request) -> Generator[Session, None, None]:
     """
     Database dependency that sets the tenant context for RLS.
     Assumes tenant_id is available in request.state.tenant_id.
@@ -44,9 +44,12 @@ def get_tenant_db(request: Request) -> Session:
     db = SessionLocal()
     try:
         tenant_id = getattr(request.state, "tenant_id", None)
+        is_super_admin = getattr(request.state, "is_super_admin", None)
         print("tennnnnn from requesterrrrr", tenant_id)
         if tenant_id:
             db.execute(f"SET app.current_tenant = '{tenant_id}'")
+        if is_super_admin:
+            db.execute(f"SET app.is_super_admin = '{is_super_admin}'")
         yield db
     except Exception as e:
         logger.error(f"Tenant DB session error: {e}")
@@ -55,7 +58,7 @@ def get_tenant_db(request: Request) -> Session:
     finally:
         db.close()
 
-def get_org_db(request: Request) -> Session:
+def get_org_db(request: Request) -> Generator[Session, None, None]:
     """
     Database dependency that sets the tenant context for RLS.
     Assumes tenant_id is available in request.state.tenant_id.
@@ -63,8 +66,13 @@ def get_org_db(request: Request) -> Session:
     db = SessionLocal()
     try:
         org_id = getattr(request.state, "tenant_id", None)
+        is_super_admin = getattr(request.state, "is_super_admin", None)
+
         if org_id:
             db.execute(f"SET app.current_org = '{org_id}'")
+        if is_super_admin:
+            db.execute(f"SET app.is_super_admin = '{is_super_admin}'")
+            
         yield db
     except Exception as e:
         logger.error(f"Org DB session error: {e}")
