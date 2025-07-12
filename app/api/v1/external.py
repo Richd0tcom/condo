@@ -128,7 +128,7 @@ async def call_external_comms_service(db: Session = Depends(get_db)):
             "recipient": user.email,
             "subject": "Test Email",
             "content": "This is a test email",
-            "status": "pending"
+            "status": "sent"
         }
 
         response = await client.post("/notifications/send", data=data)

@@ -1,5 +1,6 @@
 from typing import Dict, List
-from pydantic import BaseSettings, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 class MockServiceConfig(BaseSettings):
     """Configuration for mock external services"""
@@ -32,9 +33,9 @@ class MockServiceConfig(BaseSettings):
     event_simulation_enabled: bool = Field(True, env="EVENT_SIMULATION_ENABLED")
     event_generation_interval: int = Field(60, env="EVENT_GENERATION_INTERVAL")  # seconds
     
-    class Config:
-        env_file = ".env"
-        env_prefix = "MOCK_"
+
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="MOCK_", extra="ignore")
+
 
 # Global config instance
 mock_service_config = MockServiceConfig()

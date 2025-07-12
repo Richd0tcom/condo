@@ -5,9 +5,15 @@ from typing import Dict, Any
 import uuid
 from datetime import datetime, timedelta
 
+import pytz
+
 from app.mock.service_orchestrator import service_orchestrator
 from app.mock.mock_services import MockServiceTester, WebhookPayloadGenerator
 from app.mock.client import external_client
+from app.models.webhooks import EventType
+
+timezone_name = "Africa/Lagos"
+tz = pytz.timezone(timezone_name)
 
 class TestMockServices:
     """Integration tests for mock external services"""
@@ -15,7 +21,8 @@ class TestMockServices:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_services(self):
         """Setup mock services for testing"""
-        await service_orchestrator.start_services()
+        # await service_orchestrator.start_services()
+        await service_orchestrator.health_check()
         # Wait for services to be ready
         await asyncio.sleep(3)
         yield
@@ -70,8 +77,8 @@ class TestMockServices:
             "plan_id": "premium",
             "status": "active",
             "amount": 29.99,
-            "current_period_start": datetime.utcnow().isoformat(),
-            "current_period_end": (datetime.utcnow() + timedelta(days=30)).isoformat()
+            "current_period_start": datetime.now(tz).isoformat(),
+            "current_period_end": (datetime.now(tz) + timedelta(days=30)).isoformat(),
         }
         
         created_subscription = await external_client.create_subscription(subscription_data)
@@ -100,7 +107,7 @@ class TestMockServices:
             "recipient": "test@example.com",
             "subject": "Test Notification",
             "content": "This is a test notification",
-            "status": "pending"
+            "status": "sent"
         }
         
         sent_notification = await external_client.send_notification(notification_data)
@@ -122,21 +129,21 @@ class TestMockServices:
         generator = WebhookPayloadGenerator()
         
         # Test user event generation
-        user_event = generator.generate_user_event(tenant_id, "USER_CREATED")
+        user_event = generator.generate_user_event(tenant_id, EventType.USER_CREATED)
         assert user_event.tenant_id == tenant_id
-        assert user_event.event_type == "USER_CREATED"
+        assert user_event.event_type == EventType.USER_CREATED
         assert "email" in user_event.data
         
         # Test payment event generation
-        payment_event = generator.generate_payment_event(tenant_id, "PAYMENT_SUCCESS")
+        payment_event = generator.generate_payment_event(tenant_id, EventType.PAYMENT_SUCCESS)
         assert payment_event.tenant_id == tenant_id
-        assert payment_event.event_type == "PAYMENT_SUCCESS"
+        assert payment_event.event_type == EventType.PAYMENT_SUCCESS
         assert "amount" in payment_event.data
         
         # Test notification event generation
-        notification_event = generator.generate_notification_event(tenant_id, "EMAIL_DELIVERED")
+        notification_event = generator.generate_notification_event(tenant_id, EventType.EMAIL_DELIVERED)
         assert notification_event.tenant_id == tenant_id
-        assert notification_event.event_type == "EMAIL_DELIVERED"
+        assert notification_event.event_type == EventType.EMAIL_DELIVERED
         assert "recipient" in notification_event.data
     
     async def test_concurrent_requests(self, tenant_id: str):

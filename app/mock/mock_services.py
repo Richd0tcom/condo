@@ -11,8 +11,13 @@ import httpx
 import json
 from contextlib import asynccontextmanager
 
+import pytz
+
 from app.models.webhooks import EventType
 from app.schemas.webhooks import WebhookEvent
+
+timezone_name = "Africa/Lagos"
+tz = pytz.timezone(timezone_name)
 
 # Mock Service Models
 class UserStatus(str, Enum):
@@ -176,6 +181,7 @@ class MockUserManagementService:
         
         @self.app.get("/users/{user_id}", response_model=MockUser)
         async def get_user(user_id: str):
+            
             if user_id not in self.registry.users:
                 raise HTTPException(status_code=404, detail="User not found")
             return self.registry.users[user_id]
@@ -465,8 +471,6 @@ class WebhookPayloadGenerator:
             "name": f"Test User {random.randint(1, 100)}",
             "status": random.choice(list(UserStatus)),
             "tenant_id": tenant_id,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
         }
         
         return WebhookEvent(
@@ -484,7 +488,7 @@ class WebhookPayloadGenerator:
             "amount": round(random.uniform(10.0, 500.0), 2),
             "currency": "USD",
             "status": "succeeded" if event_type == EventType.PAYMENT_SUCCESS else "failed",
-            "processed_at": datetime.utcnow().isoformat(),
+            "processed_at": datetime.now(tz).isoformat(),
             "tenant_id": tenant_id
         }
         
@@ -506,8 +510,8 @@ class WebhookPayloadGenerator:
             "subject": "Test Notification",
             "content": "This is a test notification",
             "status": "delivered" if event_type == EventType.EMAIL_DELIVERED else "failed",
-            "sent_at": datetime.utcnow().isoformat(),
-            "delivered_at": datetime.utcnow().isoformat() if event_type == EventType.EMAIL_DELIVERED else None
+            "sent_at": datetime.now(tz).isoformat(),
+            "delivered_at": datetime.now(tz).isoformat() if event_type == EventType.EMAIL_DELIVERED else None
         }
         
         return WebhookEvent(
@@ -563,8 +567,8 @@ class MockServiceTester:
             "plan_id": "premium",
             "status": "active",
             "amount": 29.99,
-            "current_period_start": datetime.utcnow().isoformat(),
-            "current_period_end": (datetime.utcnow() + timedelta(days=30)).isoformat()
+            "current_period_start": datetime.now(tz).isoformat(),
+            "current_period_end": (datetime.now(tz) + timedelta(days=30)).isoformat()
         }
         
         async with httpx.AsyncClient() as client:
@@ -597,7 +601,7 @@ class MockServiceTester:
             "recipient": "test@example.com",
             "subject": "Test Email",
             "content": "This is a test email",
-            "status": "pending"
+            "status": "sent"
         }
         
         async with httpx.AsyncClient() as client:

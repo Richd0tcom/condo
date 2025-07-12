@@ -28,6 +28,7 @@ class EventType(str, Enum):
     EMAIL_DELIVERED = "email.delivered"
     EMAIL_BOUNCED = "email.bounced"
     EMAIL_FAILED = "email.failed"
+    EMAIL_SENT = "email.sent"
 
 class WebhookEventDB(BaseModel):
     __tablename__ = "webhook_events"

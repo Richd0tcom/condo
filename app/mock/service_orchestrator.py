@@ -154,6 +154,14 @@ class ServiceOrchestrator:
     def get_service_discovery(self) -> MockServiceDiscovery:
         """Get service discovery for URL resolution"""
         return self.discovery
+    
+    async def health_check(self):
+        health_status = await self.discovery.health_check_all()
+        for service_name, is_healthy in health_status.items():
+            if is_healthy:
+                logger.info(f"✅ {service_name} service is healthy")
+            else:
+                logger.error(f"❌ {service_name} service failed to start")
 
 # Global orchestrator instance
 service_orchestrator = ServiceOrchestrator()

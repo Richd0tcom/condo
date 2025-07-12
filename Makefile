@@ -14,7 +14,7 @@ stop-mock-services:
 
 test-mock-services:
 	@echo "🧪 Testing mock services..."
-	pytest app/scripts/test_mock.py -v
+	PYTHONPATH=. pytest app/scripts/test_mock.py -v
 
 
 clean-mock-services:
