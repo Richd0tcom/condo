@@ -12,7 +12,7 @@ class VendorErrorResponse(BaseModel):
 
 
 class SlackInviteUserResponses(BaseModel):
-    success_response: SlackInviteUserSuccessResponse
+    success_response: Optional[Dict[str, str]] = None
     error_response: Optional[VendorErrorResponse] = None
 
 class VendorIntegrationResponses(BaseModel):

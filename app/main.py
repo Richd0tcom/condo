@@ -53,7 +53,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add custom middleware (order matters!)
+
 app.add_middleware(TenantContextMiddleware)
 app.add_middleware(AuditMiddleware)
 # app.add_middleware(RateLimitMiddleware, redis_client=redis_client)

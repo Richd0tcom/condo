@@ -21,7 +21,6 @@ class TestMockServices:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_services(self):
         """Setup mock services for testing"""
-        # await service_orchestrator.start_services()
         await service_orchestrator.health_check()
         # Wait for services to be ready
         await asyncio.sleep(3)
@@ -35,14 +34,12 @@ class TestMockServices:
     
     async def test_user_management_service(self, tenant_id: str):
         """Test user management service CRUD operations"""
-        # Test data
         user_data = {
             "email": "testuser@example.com",
             "name": "Test User",
             "tenant_id": tenant_id
         }
         
-        # Create user
         created_user = await external_client.create_user(user_data)
         assert created_user is not None
         assert created_user["email"] == user_data["email"]

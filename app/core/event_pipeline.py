@@ -104,7 +104,6 @@ class EventPipeline:
             async with self._lock:
                 self.deduplication_cache[event_hash] = payload.timestamp
                 
-                # Cache cleanup
                 if len(self.deduplication_cache) > 1000:
                     oldest_keys = sorted(
                         self.deduplication_cache.keys(),

@@ -105,7 +105,6 @@ class ExternalApiClient:
                 raise ExternalServiceError(f"Server error: {response.status_code}")
             
             print("response status code: ",response.status_code)
-            # print("response content: ",response.content)
             
             response.raise_for_status()
             return response

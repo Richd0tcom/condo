@@ -163,5 +163,4 @@ class ServiceOrchestrator:
             else:
                 logger.error(f"❌ {service_name} service failed to start")
 
-# Global orchestrator instance
 service_orchestrator = ServiceOrchestrator()

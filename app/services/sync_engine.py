@@ -288,7 +288,6 @@ class DataSyncEngine:
         )
         
         try:
-            # Fetch internal data that needs syncing
             internal_records = await self._fetch_internal_data(db, config)
             result.records_processed = len(internal_records)
             
@@ -324,7 +323,6 @@ class DataSyncEngine:
         """Sync a single record from external service to internal database"""
         
         try:
-            # Check if record already exists internally
             internal_record = await self._find_internal_record(
                 db, config, external_record.external_id
             )

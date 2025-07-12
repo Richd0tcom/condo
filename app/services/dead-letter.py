@@ -4,6 +4,7 @@ import structlog
 from app.core.database import get_db
 from app.mock.mock_services import WebhookEvent
 from app.models.webhooks import WebhookStatus
+from app.tasks.webhook import process_webhook_event
 
 
 logger = structlog.get_logger(__name__)

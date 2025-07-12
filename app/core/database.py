@@ -96,12 +96,10 @@ def get_db_session() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-# Alternative: Function that returns a context manager
 def db_session():
     """Returns a context manager for database sessions"""
     return get_db_session()
 
-# For async contexts (if you prefer async/await style)
 class AsyncDatabaseSession:
     def __init__(self):
         self.db = None

@@ -68,7 +68,6 @@ async def login(
         user_service = UserService(db)
         tenant_service = TenantService(db)
         
-        # Determine tenant from slug or domain
         tenant = None
         if login_data.tenant_slug:
             tenant = tenant_service.get_tenant_by_slug(login_data.tenant_slug)

@@ -24,12 +24,10 @@ class MockServiceRunner:
             style="bold blue"
         ))
         
-        # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
         try:
-            # Start services
             await service_orchestrator.start_services()
             
             console.print("\n✅ All services started successfully!", style="bold green")
@@ -48,7 +46,6 @@ class MockServiceRunner:
             
             console.print("\n⚡ Press Ctrl+C to stop services...\n", style="yellow")
             
-            # Keep running until signal
             while self.running:
                 await asyncio.sleep(1)
                 
@@ -69,7 +66,6 @@ class MockServiceRunner:
         console.print("✅ Services stopped cleanly", style="green")
 
 async def main():
-    # Use uvloop for better performance
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     
     runner = MockServiceRunner()
